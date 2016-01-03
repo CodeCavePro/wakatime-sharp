@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
+using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
@@ -8,11 +10,15 @@ namespace WakaTime
     static class PythonManager
     {
         private const string CurrentPythonVersion = "3.5.0";
-        private static string PythonBinaryLocation { get; set; }        
+        private static string PythonBinaryLocation { get; set; }
 
-        internal static bool IsPythonInstalled()
+        internal static void Initialize()
         {
-            return GetPython() != null;
+            // Make sure python is installed
+            if (PythonManager.IsPythonInstalled())
+                return;
+
+            DownloadPython();
         }
 
         internal static string GetPython()
@@ -23,10 +29,12 @@ namespace WakaTime
             if (PythonBinaryLocation == null)
                 PythonBinaryLocation = GetPathFromMicrosoftRegistry();
 
-            if (PythonBinaryLocation == null)
-                PythonBinaryLocation = GetPathFromFixedPath();
-
-            return PythonBinaryLocation;
+            return PythonBinaryLocation ?? (PythonBinaryLocation = GetPathFromFixedPath());
+        }
+        
+        static bool IsPythonInstalled()
+        {
+            return GetPython() != null;
         }
 
         static string GetPathFromMicrosoftRegistry()
@@ -69,6 +77,7 @@ namespace WakaTime
         {
             string[] locations = {
                 "pythonw",
+                "python3",
                 "python",
                 "\\Python37\\pythonw",
                 "\\Python36\\pythonw",
@@ -131,9 +140,10 @@ namespace WakaTime
             return null;
         }
 
-        internal static string GetEmbeddedPath()
+        static string GetEmbeddedPath()
         {
-            var path = Path.Combine(WakaTimeConstants.UserConfigDir, "python", "pythonw");
+            var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var path = Path.Combine(localAppDataPath, "python", "pythonw");
             try
             {
                 var process = new RunProcess(path, "--version");
@@ -154,7 +164,7 @@ namespace WakaTime
             }
         }
 
-        internal static string PythonDownloadUrl
+        static string PythonDownloadUrl
         {
             get
             {
@@ -163,6 +173,34 @@ namespace WakaTime
                     arch = "amd64";
                 return string.Format("https://www.python.org/ftp/python/{0}/python-{0}-embed-{1}.zip", CurrentPythonVersion, arch);
             }
+        }
+
+        static public void DownloadPython()
+        {
+            Logger.Debug("Downloading python...");
+
+            var tempDir = Path.GetTempPath();
+            var localFile = Path.Combine(tempDir, "python.zip");
+            var client = new WebClient
+            {
+                Proxy = WakaTimeConfigFile.GetProxy() // Check for proxy setting
+            };
+
+            // Download embeddable python
+            client.DownloadFile(PythonDownloadUrl, localFile);
+
+            Logger.Debug("Finished downloading python.");
+
+            // Extract wakatime cli zip file
+            var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            ZipFile.ExtractToDirectory(localFile, Path.Combine(localAppDataPath, "python"));
+            Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(localAppDataPath, "python")));
+
+            try
+            {
+                File.Delete(localFile);
+            }
+            catch { /* ignored */ }
         }
     }
 }

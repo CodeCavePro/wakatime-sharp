@@ -1,364 +1,192 @@
 ﻿using System;
-using System.ComponentModel.Design;
 using System.IO;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.VisualStudio.Shell;
+using System.Threading.Tasks;
 using WakaTime.Forms;
-using Task = System.Threading.Tasks.Task;
-using System.Net;
-using System.Text.RegularExpressions;
 
 namespace WakaTime
 {
-    [PackageRegistration(UseManagedResourcesOnly = true)]
-    [InstalledProductRegistration("#110", "#112", "1.0", IconResourceID = 400)]
-    [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(GuidList.GuidWakaTimePkgString)]
-    [ProvideAutoLoad("ADFC4E64-0397-11D1-9F4E-00A0C911004F")]
-    public sealed class WakaTimePackage : Package
+    public abstract class WakaTimePackage : IWakaTimePackage
     {
         #region Fields
-        private static WakaTimeConfigFile _wakaTimeConfigFile;
-        private static SettingsForm _settingsForm;
 
-        private DocumentEvents _docEvents;
-        private WindowEvents _windowEvents;
-        private SolutionEvents _solutionEvents;
+        protected string lastFile;
+        protected string lastSolutionName;
 
-        public static DTE2 objDte = null;
+        protected DateTime lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
+        private static readonly object ThreadLock = new object();
 
-        // Settings
-        public static bool Debug;
-        public static string ApiKey;
-        public static string Proxy;
+        protected EditorInfo editorInfo;
 
-        static readonly PythonCliParameters PythonCliParameters = new PythonCliParameters();
-        private static string _lastFile;
-        private static string _solutionName = string.Empty;
-        DateTime _lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
         #endregion
 
         #region Startup/Cleanup
-        protected override void Initialize()
-        {
-            base.Initialize();
-            
-            Task.Run(() =>
-            {
-                InitializeAsync();
-            });
-        }
 
-        public void InitializeAsync()
+        public void Initialize()
         {
-
             try
             {
-                Logger.Info(string.Format("Initializing WakaTime v{0}", WakaTimeConstants.PluginVersion));
+                editorInfo = GetEditorInfo();
 
-                // VisualStudio Object
-                objDte = (DTE2)GetService(typeof(DTE));
-                _docEvents = objDte.Events.DocumentEvents;
-                _windowEvents = objDte.Events.WindowEvents;
-                _solutionEvents = objDte.Events.SolutionEvents;
+                Logger.Info("Initializing WakaTime v" + editorInfo.PluginVersion);
 
-                // Settings Form
-                _settingsForm = new SettingsForm();
-                _settingsForm.ConfigSaved += SettingsFormOnConfigSaved;
+                PythonManager.Initialize();
+                WakaTimeCli.Initialize();
 
-                // Load config file
-                _wakaTimeConfigFile = new WakaTimeConfigFile();
-                GetSettings();
-
-                // Make sure python is installed
-                if (!PythonManager.IsPythonInstalled())
-                {
-                    Downloader.DownloadAndInstallPython();
-                }
-
-                if (!DoesCliExist() || !IsCliLatestVersion())
-                {
-                    try
-                    {
-                        Directory.Delete(Path.Combine(WakaTimeConstants.UserConfigDir, "wakatime-master"), true);
-                    }
-                    catch { /* ignored */ }
-
-                    Downloader.DownloadAndInstallCli();
-                }
-
-                if (string.IsNullOrEmpty(ApiKey))
+                if (string.IsNullOrEmpty(WakaTimeConfigFile.ApiKey))
                     PromptApiKey();
 
-                // Add our command handlers for menu (commands must exist in the .vsct file)
-                var mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
-                if (mcs != null)
-                {
-                    // Create the command for the menu item.
-                    var menuCommandId = new CommandID(GuidList.GuidWakaTimeCmdSet, (int)PkgCmdIdList.UpdateWakaTimeSettings);
-                    var menuItem = new MenuCommand(MenuItemCallback, menuCommandId);
-                    mcs.AddCommand(menuItem);
-                }
+                BindEditorEvents();
 
-                // setup event handlers
-                _docEvents.DocumentOpened += DocEventsOnDocumentOpened;
-                _docEvents.DocumentSaved += DocEventsOnDocumentSaved;
-                _windowEvents.WindowActivated += WindowEventsOnWindowActivated;
-                _solutionEvents.Opened += SolutionEventsOnOpened;
-
-                Logger.Info(string.Format("Finished initializing WakaTime v{0}", WakaTimeConstants.PluginVersion));
+                Logger.Info("Finished initializing WakaTime v" + editorInfo.PluginVersion);
             }
             catch (Exception ex)
             {
-                Logger.Error("Error initializing Wakatime", ex);
+                Logger.Error(ex.Message);
             }
         }
+
+        public abstract ILogger GetLogger();
+
+        public abstract void BindEditorEvents();
+
+        public abstract EditorInfo GetEditorInfo();
+
+        public abstract string GetActiveSolutionPath();
 
         #endregion
 
         #region Event Handlers
-        private void DocEventsOnDocumentOpened(Document document)
-        {
-            try
-            {
-                HandleActivity(document.FullName, false);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("DocEventsOnDocumentOpened", ex);
-            }
-        }
 
-        private void DocEventsOnDocumentSaved(Document document)
+        public void OnWindowOrDocumentActivated()
         {
             try
             {
-                HandleActivity(document.FullName, true);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("DocEventsOnDocumentSaved", ex);
-            }
-        }
+                var solutionName = GetActiveSolutionPath();
+                if (string.IsNullOrWhiteSpace(solutionName))
+                    return;
 
-        private void WindowEventsOnWindowActivated(Window gotFocus, Window lostFocus)
-        {
-            try
-            {
-                var document = objDte.ActiveWindow.Document;
+                var document = GetActiveSolutionPath();
                 if (document != null)
-                    HandleActivity(document.FullName, false);
+                    HandleActivity(document, false);
             }
             catch (Exception ex)
             {
-                Logger.Error("WindowEventsOnWindowActivated", ex);
+                Logger.Error("HandleWindowOrDocumentActivated : " + ex.Message);
             }
         }
 
-        private void SolutionEventsOnOpened()
+        public void OnDocumentOpened(string documentName)
         {
             try
             {
-                _solutionName = objDte.Solution.FullName;
+                var solutionName = GetActiveSolutionPath();
+                if (string.IsNullOrWhiteSpace(solutionName))
+                    return;
+
+                HandleActivity(documentName, false);
             }
             catch (Exception ex)
             {
-                Logger.Error("SolutionEventsOnOpened", ex);
+                Logger.Error("HandleDocumentOpened : " + ex.Message);
             }
         }
+
+        public void OnDocumentChanged(string documentName)
+        {
+            try
+            {
+                var solutionName = GetActiveSolutionPath();
+                if (string.IsNullOrWhiteSpace(solutionName))
+                    return;
+
+                HandleActivity(documentName, true);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("HandleDocumentChanged : " + ex.Message);
+            }
+        }
+
+        public void OnSolutionOpened(string solutionPath)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(solutionPath))
+                    return;
+
+                lastSolutionName = solutionPath;
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("HandleSolutionOpened : " + ex.Message);
+            }
+        }
+
         #endregion
 
         #region Methods
 
-        private static void SettingsFormOnConfigSaved(object sender, EventArgs eventArgs)
-        {
-            _wakaTimeConfigFile.Read();
-            GetSettings();
-        }
-
-        private static void GetSettings()
-        {
-            ApiKey = _wakaTimeConfigFile.ApiKey;
-            Debug = _wakaTimeConfigFile.Debug;
-            Proxy = _wakaTimeConfigFile.Proxy;
-        }
-
-        private void HandleActivity(string currentFile, bool isWrite)
+        protected void HandleActivity(string currentFile, bool isWrite)
         {
             if (currentFile == null)
                 return;
-
-            if (!isWrite && _lastFile != null && !EnoughTimePassed() && currentFile.Equals(_lastFile))
+            
+            if (!isWrite && lastFile != null && !IsEnoughTimePassed() && currentFile.Equals(lastFile))
                 return;
+
+            var args = new PythonCliParameters
+            {
+                File = currentFile,
+                Plugin = string.Format("{0}/{1} {2}/{3}", editorInfo.Name, editorInfo.Version, editorInfo.PluginName, editorInfo.PluginVersion),
+                IsWrite = isWrite,
+                Project = GetProjectName()
+            };
 
             Task.Run(() =>
             {
-                SendHeartbeat(currentFile, isWrite);
+                lock (ThreadLock)
+                {
+                    WakaTimeCli.SendHeartbeat(args);
+                }
             });
 
-
-            _lastFile = currentFile;
-            _lastHeartbeat = DateTime.UtcNow;
+            lastFile = currentFile;
+            lastHeartbeat = DateTime.UtcNow;
         }
 
-        private bool EnoughTimePassed()
+        protected bool IsEnoughTimePassed()
         {
-            return _lastHeartbeat < DateTime.UtcNow.AddMinutes(-1);
+            return lastHeartbeat < DateTime.UtcNow.AddMinutes(-1);
         }
 
-        public static void SendHeartbeat(string fileName, bool isWrite)
+        protected static void PromptApiKey()
         {
-            PythonCliParameters.Key = ApiKey;
-            PythonCliParameters.File = fileName;
-            PythonCliParameters.Plugin = string.Format("{0}/{1} {2}/{3}", WakaTimeConstants.EditorName, WakaTimeConstants.EditorVersion, WakaTimeConstants.PluginName, WakaTimeConstants.PluginVersion);
-            PythonCliParameters.IsWrite = isWrite;
-            PythonCliParameters.Project = GetProjectName();
-
-            var pythonBinary = PythonManager.GetPython();
-            if (pythonBinary != null)
+            using (var form = new ApiKeyForm())
             {
-                var process = new RunProcess(pythonBinary, PythonCliParameters.ToArray());
-                if (Debug)
-                {
-                    Logger.Debug(string.Format("[\"{0}\", \"{1}\"]", pythonBinary, string.Join("\", \"", PythonCliParameters.ToArray(true))));
-                    process.Run();
-                    Logger.Debug(string.Format("CLI STDOUT: {0}", process.Output));
-                    Logger.Debug(string.Format("CLI STDERR: {0}", process.Error));
-                }
-                else
-                    process.RunInBackground();
-
-                if (!process.Success)
-                    Logger.Error(string.Format("Could not send heartbeat: {0}", process.Error));
-            }
-            else
-                Logger.Error("Could not send heartbeat because python is not installed");
-        }
-
-        static bool DoesCliExist()
-        {
-            return File.Exists(PythonCliParameters.Cli);
-        }
-
-        static bool IsCliLatestVersion()
-        {
-            var process = new RunProcess(PythonManager.GetPython(), PythonCliParameters.Cli, "--version");
-            process.Run();
-
-            if (process.Success)
-            {
-                var currentVersion = process.Error.Trim();
-                Logger.Info(string.Format("Current wakatime-cli version is {0}", currentVersion));
-
-                Logger.Info("Checking for updates to wakatime-cli...");
-                var latestVersion = WakaTimeConstants.LatestWakaTimeCliVersion();
-
-                if (currentVersion.Equals(latestVersion))
-                {
-                    Logger.Info("wakatime-cli is up to date.");
-                    return true;
-                }
-                else
-                {
-                    Logger.Info(string.Format("Found an updated wakatime-cli v{0}", latestVersion));
-                }
-
-            }
-            return false;
-        }
-
-        private static void MenuItemCallback(object sender, EventArgs e)
-        {
-            try
-            {
-                SettingsPopup();
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("MenuItemCallback", ex);
+                form.Show();
             }
         }
 
-        private static void PromptApiKey()
+        protected static void SettingsPopup()
         {
-            var form = new ApiKeyForm();
-            form.ShowDialog();
-        }
-
-        private static void SettingsPopup()
-        {
-            _settingsForm.ShowDialog();
-        }
-
-        private static string GetProjectName()
-        {
-            return !string.IsNullOrEmpty(_solutionName)
-                ? Path.GetFileNameWithoutExtension(_solutionName)
-                : (objDte.Solution != null && !string.IsNullOrEmpty(objDte.Solution.FullName))
-                    ? Path.GetFileNameWithoutExtension(objDte.Solution.FullName)
-                    : string.Empty;
-        }
-        
-        public static WebProxy GetProxy()
-        {
-            WebProxy proxy = null;
-
-            try
+            using (var form = new SettingsForm())
             {
-                var proxyStr = Proxy;
-
-                // Regex that matches proxy address with authentication
-                var regProxyWithAuth = new Regex(@"\s*(https?:\/\/)?([^\s:]+):([^\s:]+)@([^\s:]+):(\d+)\s*");
-                var match = regProxyWithAuth.Match(proxyStr);
-
-                if (match.Success)
-                {
-                    var username = match.Groups[2].Value;
-                    var password = match.Groups[3].Value;
-                    var address = match.Groups[4].Value;
-                    var port = match.Groups[5].Value;
-
-                    var credentials = new NetworkCredential(username, password);
-                    proxy = new WebProxy(string.Join(":", address, port), true, null, credentials);
-
-                    Logger.Debug("A proxy with authentication will be used.");
-                    return proxy;
-                }
-
-                // Regex that matches proxy address and port(no authentication)
-                var regProxy = new Regex(@"\s*(https?:\/\/)?([^\s@]+):(\d+)\s*");
-                match = regProxy.Match(proxyStr);
-
-                if (match.Success)
-                {
-                    var address = match.Groups[2].Value;
-                    var port = int.Parse(match.Groups[3].Value);
-
-                    proxy = new WebProxy(address, port);
-
-                    Logger.Debug("A proxy will be used.");
-                    return proxy;
-                }
-
-                Logger.Debug("No proxy will be used. It's either not set or badly formatted.");
+                form.Show();
             }
-            catch (Exception ex)
-            {
-                Logger.Error("Exception while parsing the proxy string from WakaTime config file. No proxy will be used.", ex);
-            }
-
-            return proxy;
         }
+
+        protected string GetProjectName()
+        {
+            if (!string.IsNullOrEmpty(lastSolutionName))
+                return Path.GetFileNameWithoutExtension(lastSolutionName);
+
+            var solutionPath = GetActiveSolutionPath();
+            return (string.IsNullOrWhiteSpace(solutionPath))
+                ? (lastSolutionName = Path.GetFileNameWithoutExtension(lastSolutionName))
+                : null;
+        }
+
         #endregion
-
-        public static class CoreAssembly
-        {
-            static readonly Assembly Reference = typeof(CoreAssembly).Assembly;
-            public static readonly Version Version = Reference.GetName().Version;
-        }
     }
 }
+

@@ -5,20 +5,16 @@ namespace WakaTime.Forms
 {
     public partial class ApiKeyForm : Form
     {
-        private readonly WakaTimeConfigFile _wakaTimeConfigFile;
-
         public ApiKeyForm()
         {
             InitializeComponent();
-
-            _wakaTimeConfigFile = new WakaTimeConfigFile();
         }
 
         private void ApiKeyForm_Load(object sender, EventArgs e)
         {
             try
             {
-                txtAPIKey.Text = _wakaTimeConfigFile.ApiKey;
+                txtAPIKey.Text = WakaTimeConfigFile.ApiKey;
             }
             catch (Exception ex)
             {
@@ -34,13 +30,12 @@ namespace WakaTime.Forms
                 var parse = Guid.TryParse(txtAPIKey.Text.Trim(), out apiKey);                              
                 if (parse)
                 {
-                    _wakaTimeConfigFile.ApiKey = apiKey.ToString();
-                    _wakaTimeConfigFile.Save();
-                    WakaTimePackage.ApiKey = apiKey.ToString();
+                    WakaTimeConfigFile.ApiKey = apiKey.ToString();
+                    WakaTimeConfigFile.Save();
                 }
                 else
                 {
-                    MessageBox.Show("Please enter valid Api Key.");
+                    MessageBox.Show("Please enter valid API Key.");
                     DialogResult = DialogResult.None; // do not close dialog box
                 }
             }

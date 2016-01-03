@@ -5,23 +5,20 @@ namespace WakaTime.Forms
 {
     public partial class SettingsForm : Form
     {
-        private readonly WakaTimeConfigFile _wakaTimeConfigFile;
         internal event EventHandler ConfigSaved;
 
         public SettingsForm()
         {
             InitializeComponent();
-
-            _wakaTimeConfigFile = new WakaTimeConfigFile();
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
             try
             {
-                txtAPIKey.Text = _wakaTimeConfigFile.ApiKey;
-                txtProxy.Text = _wakaTimeConfigFile.Proxy;
-                chkDebugMode.Checked = _wakaTimeConfigFile.Debug;
+                txtAPIKey.Text = WakaTimeConfigFile.ApiKey;
+                txtProxy.Text = WakaTimeConfigFile.Proxy;
+                chkDebugMode.Checked = WakaTimeConfigFile.Debug;
             }
             catch (Exception ex)
             {
@@ -39,10 +36,10 @@ namespace WakaTime.Forms
                                      
                 if (parse)
                 {
-                    _wakaTimeConfigFile.ApiKey = apiKey.ToString();
-                    _wakaTimeConfigFile.Proxy = txtProxy.Text.Trim();
-                    _wakaTimeConfigFile.Debug = chkDebugMode.Checked;
-                    _wakaTimeConfigFile.Save();
+                    WakaTimeConfigFile.ApiKey = apiKey.ToString();
+                    WakaTimeConfigFile.Proxy = txtProxy.Text.Trim();
+                    WakaTimeConfigFile.Debug = chkDebugMode.Checked;
+                    WakaTimeConfigFile.Save();
                     OnConfigSaved();                    
                 }
                 else

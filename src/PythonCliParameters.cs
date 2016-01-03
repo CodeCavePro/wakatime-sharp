@@ -6,11 +6,6 @@ namespace WakaTime
 {
     internal class PythonCliParameters
     {
-        public string Cli
-        {
-            get { return Path.Combine(WakaTimeConstants.UserConfigDir, WakaTimeConstants.CliFolder); }
-        }
-        public string Key { get; set; }
         public string File { get; set; }
         public string Plugin { get; set; }
         public bool IsWrite { get; set; }
@@ -18,11 +13,12 @@ namespace WakaTime
 
         public string[] ToArray(bool obfuscate = false)
         {
+            var key = WakaTimeConfigFile.ApiKey;
             var parameters = new Collection<string>
             {
-                Cli,
+                WakaTimeCli.GetCliPath(),
                 "--key",
-                obfuscate ? string.Format("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{0}", Key.Substring(Key.Length - 4)) : Key,
+                obfuscate ? string.Format("XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX{0}", key.Substring(key.Length - 4)) : key,
                 "--file",
                 File,
                 "--plugin",

@@ -11,11 +11,18 @@ namespace WakaTime
         HandledException
     };
 
-    static class Logger
+    internal static class Logger
     {
+        private static ILogger _logger;
+
+        internal static void Initialize(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         internal static void Debug(string message)
         {
-            if (!WakaTimePackage.Debug)
+            if (!WakaTimeConfigFile.Debug)
                 return;
 
             Log(LogLevel.Debug, message);
@@ -23,9 +30,7 @@ namespace WakaTime
 
         internal static void Error(string message, Exception ex = null)
         {
-            var exceptionMessage = string.Format("{0}: {1}", message, ex);
-
-            Log(LogLevel.HandledException, exceptionMessage);
+            Log(LogLevel.HandledException, string.Format("{0}: {1}", message, ex));
         }
 
         internal static void Warning(string message)
@@ -38,10 +43,31 @@ namespace WakaTime
             Log(LogLevel.Info, message);
         }
 
-        private static string Log(LogLevel level, string message)
+        private static void Log(LogLevel level, string message)
         {
-            return string.Format("[Wakatime {0} {1}] {2}{3}", 
-                Enum.GetName(level.GetType(), level), DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture), message, Environment.NewLine);
+            {
+                message = string.Format("[Wakatime {0} {1}] {2}{3}",
+                    Enum.GetName(level.GetType(), level),
+                    DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture),
+                    message,
+                    Environment.NewLine);
+
+                switch (level)
+                {
+                    case LogLevel.Debug:
+                        _logger.Debug(message);
+                        break;
+                    case LogLevel.Info:
+                        _logger.Info(message);
+                        break;
+                    case LogLevel.Warning:
+                        _logger.Warning(message);
+                        break;
+                    case LogLevel.HandledException:
+                        _logger.Error(message);
+                        break;
+                }
+            }
         }
     }
 }
