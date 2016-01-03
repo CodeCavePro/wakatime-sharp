@@ -5,7 +5,7 @@ using WakaTime.Forms;
 
 namespace WakaTime
 {
-    public abstract class WakaTimePackage : IWakaTimePackage
+    public abstract class WakaTimeIdePlugin<T> : IWakaTimeIdePlugin, IDisposable
     {
         #region Fields
 
@@ -13,15 +13,27 @@ namespace WakaTime
         protected string lastSolutionName;
 
         protected DateTime lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
-        private static readonly object ThreadLock = new object();
+        protected readonly object threadLock = new object();
 
         protected EditorInfo editorInfo;
+        protected T editorObj;
 
         #endregion
 
         #region Startup/Cleanup
 
-        public void Initialize()
+        protected WakaTimeIdePlugin(T editor)
+        {
+            editorObj = editor;
+            Initialize();
+        }
+
+        ~WakaTimeIdePlugin()
+        {
+            Dispose(false);
+        }
+
+        private void Initialize()
         {
             try
             {
@@ -45,7 +57,7 @@ namespace WakaTime
             }
         }
 
-        public abstract ILogger GetLogger();
+        public abstract ILogService GetLogger();
 
         public abstract void BindEditorEvents();
 
@@ -56,24 +68,6 @@ namespace WakaTime
         #endregion
 
         #region Event Handlers
-
-        public void OnWindowOrDocumentActivated()
-        {
-            try
-            {
-                var solutionName = GetActiveSolutionPath();
-                if (string.IsNullOrWhiteSpace(solutionName))
-                    return;
-
-                var document = GetActiveSolutionPath();
-                if (document != null)
-                    HandleActivity(document, false);
-            }
-            catch (Exception ex)
-            {
-                Logger.Error("HandleWindowOrDocumentActivated : " + ex.Message);
-            }
-        }
 
         public void OnDocumentOpened(string documentName)
         {
@@ -144,7 +138,7 @@ namespace WakaTime
 
             Task.Run(() =>
             {
-                lock (ThreadLock)
+                lock (threadLock)
                 {
                     WakaTimeCli.SendHeartbeat(args);
                 }
@@ -159,7 +153,7 @@ namespace WakaTime
             return lastHeartbeat < DateTime.UtcNow.AddMinutes(-1);
         }
 
-        protected static void PromptApiKey()
+        public void PromptApiKey()
         {
             using (var form = new ApiKeyForm())
             {
@@ -167,7 +161,7 @@ namespace WakaTime
             }
         }
 
-        protected static void SettingsPopup()
+        public void SettingsPopup()
         {
             using (var form = new SettingsForm())
             {
@@ -185,6 +179,14 @@ namespace WakaTime
                 ? (lastSolutionName = Path.GetFileNameWithoutExtension(lastSolutionName))
                 : null;
         }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        public abstract void Dispose(bool disposing);
 
         #endregion
     }

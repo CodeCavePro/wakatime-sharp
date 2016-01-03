@@ -1,20 +1,14 @@
-﻿using System;
-
-namespace WakaTime
+﻿namespace WakaTime
 {
-    public interface IWakaTimePackage
+    public interface IWakaTimeIdePlugin
     {
-        void Initialize();
-
         void BindEditorEvents();
 
-        ILogger GetLogger();
+        ILogService GetLogger();
 
         EditorInfo GetEditorInfo();
 
         string GetActiveSolutionPath();
-
-        void OnWindowOrDocumentActivated();
 
         void OnDocumentOpened(string documentName);
 

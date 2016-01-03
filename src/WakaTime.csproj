@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B05537E5-6B8D-419D-B470-B6FA57BB1C2E}</ProjectGuid>
+    <ProjectGuid>{6F6402C0-7409-4E89-B824-14DE9C69E55F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WakaTime</RootNamespace>
@@ -86,8 +86,8 @@
     <Compile Include="Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="ILogger.cs" />
-    <Compile Include="IWakaTimePackage.cs" />
+    <Compile Include="ILogService.cs" />
+    <Compile Include="IWakaTimeIdePlugin.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="ProcessorArchitectureHelper.cs" />
@@ -97,7 +97,7 @@
     <Compile Include="RunProcess.cs" />
     <Compile Include="WakaTimeCli.cs" />
     <Compile Include="WakaTimeConfigFile.cs" />
-    <Compile Include="WakaTimePackage.cs" />
+    <Compile Include="WakaTimeIdePlugin.cs" />
     <None Include="app.config" />
     <None Include="Key.snk" />
     <None Include="packages.config" />
