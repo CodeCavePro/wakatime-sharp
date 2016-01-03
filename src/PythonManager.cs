@@ -15,7 +15,7 @@ namespace WakaTime
         internal static void Initialize()
         {
             // Make sure python is installed
-            if (PythonManager.IsPythonInstalled())
+            if (IsPythonInstalled())
                 return;
 
             DownloadPython();
