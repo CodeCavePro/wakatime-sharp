@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6F6402C0-7409-4E89-B824-14DE9C69E55F}</ProjectGuid>
+    <ProjectGuid>{B05537E5-6B8D-419D-B470-B6FA57BB1C2E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WakaTime</RootNamespace>
