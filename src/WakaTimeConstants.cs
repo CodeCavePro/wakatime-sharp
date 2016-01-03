@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using EnvDTE;
-using EnvDTE80;
 
 namespace WakaTime
 {
@@ -11,6 +9,7 @@ namespace WakaTime
         internal const string PluginName = "visualstudio-wakatime";
         internal static string PluginVersion = string.Format("{0}.{1}.{2}", WakaTimePackage.CoreAssembly.Version.Major, WakaTimePackage.CoreAssembly.Version.Minor, WakaTimePackage.CoreAssembly.Version.Build);
         internal const string EditorName = "visualstudio";
+
         internal static string EditorVersion {
             get
             {

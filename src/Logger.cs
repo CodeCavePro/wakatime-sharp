@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Globalization;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 namespace WakaTime
 {
@@ -15,27 +13,6 @@ namespace WakaTime
 
     static class Logger
     {
-        private static IVsOutputWindowPane _wakatimeOutputWindowPane;
-
-        private static IVsOutputWindowPane WakatimeOutputWindowPane
-        {
-            get { return _wakatimeOutputWindowPane ?? (_wakatimeOutputWindowPane = GetWakatimeOutputWindowPane()); }
-        }
-
-        private static IVsOutputWindowPane GetWakatimeOutputWindowPane()
-        {
-            var outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-            if (outputWindow == null) return null;
-
-            var outputPaneGuid = new Guid(GuidList.GuidWakatimeOutputPane.ToByteArray());
-            IVsOutputWindowPane windowPane;
-
-            outputWindow.CreatePane(ref outputPaneGuid, "Wakatime", 1, 1);
-            outputWindow.GetPane(ref outputPaneGuid, out windowPane);
-
-            return windowPane;
-        }
-
         internal static void Debug(string message)
         {
             if (!WakaTimePackage.Debug)
@@ -61,15 +38,10 @@ namespace WakaTime
             Log(LogLevel.Info, message);
         }
 
-        private static void Log(LogLevel level, string message)
+        private static string Log(LogLevel level, string message)
         {
-            var outputWindowPane = WakatimeOutputWindowPane;
-            if (outputWindowPane == null) return;
-
-            var outputMessage = string.Format("[Wakatime {0} {1}] {2}{3}", Enum.GetName(level.GetType(), level),
-                DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture), message, Environment.NewLine);
-
-            outputWindowPane.OutputString(outputMessage);
+            return string.Format("[Wakatime {0} {1}] {2}{3}", 
+                Enum.GetName(level.GetType(), level), DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture), message, Environment.NewLine);
         }
     }
 }

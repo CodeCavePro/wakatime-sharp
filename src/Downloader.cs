@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
+﻿using System.IO;
 using System.Net;
+using System.IO.Compression;
 
 namespace WakaTime
 {
