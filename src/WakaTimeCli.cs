@@ -98,7 +98,7 @@ namespace WakaTime
                 if (match.Success)
                 {
                     var groupVersion = match.Groups[2];
-                    var regexVersion = new Regex(@"(?<major>/d)\.(?<minor>/d)\.(?<build>/d))");
+                    var regexVersion = new Regex(@"\'(?<major>\d)\'\,\s?\'(?<minor>\d)\'\,\s?\'(?<build>\d)\'");
                     var versionMatch = regexVersion.Match(groupVersion.Value);
                     return new Version(
                         int.Parse(versionMatch.Groups["major"].Value),
