@@ -39,6 +39,7 @@ namespace WakaTime
             {
                 editorInfo = GetEditorInfo();
 
+                Logger.Initialize(GetLogger());
                 Logger.Info("Initializing WakaTime v" + editorInfo.PluginVersion);
 
                 PythonManager.Initialize();
