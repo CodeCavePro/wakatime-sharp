@@ -1,3 +1,4 @@
 # Exclude NuGet packages
 packages
 bin
+/packaging/*.log
