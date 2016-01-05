@@ -39,7 +39,7 @@ namespace WakaTime
                 editorInfo = GetEditorInfo();
 
                 Logger.Initialize(GetLogger());
-                Logger.Info("Initializing WakaTime v" + editorInfo.PluginVersion);
+                Logger.Info(string.Format("Initializing WakaTime v{0}", editorInfo.PluginVersion));
 
                 PythonManager.Initialize();
                 WakaTimeCli.Initialize();
@@ -49,11 +49,11 @@ namespace WakaTime
 
                 BindEditorEvents();
 
-                Logger.Info("Finished initializing WakaTime v" + editorInfo.PluginVersion);
+                Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
             }
             catch (Exception ex)
             {
-                Logger.Error(ex.Message);
+                Logger.Error("Error initializing Wakatime", ex);
             }
         }
 
