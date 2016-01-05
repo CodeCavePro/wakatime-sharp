@@ -23,15 +23,22 @@ namespace WakaTime
 
         internal static string GetPython()
         {
-            if (PythonBinaryLocation == null)
-                PythonBinaryLocation = GetEmbeddedPath();
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Win32NT:
+                    if (PythonBinaryLocation == null)
+                        PythonBinaryLocation = GetEmbeddedPath();
 
-            if (PythonBinaryLocation == null)
-                PythonBinaryLocation = GetPathFromMicrosoftRegistry();
+                    if (PythonBinaryLocation == null)
+                        PythonBinaryLocation = GetPathFromMicrosoftRegistry();
 
-            return PythonBinaryLocation ?? (PythonBinaryLocation = GetPathFromFixedPath());
+                    goto default;
+
+                default:
+                    return PythonBinaryLocation ?? (PythonBinaryLocation = GetPathFromFixedPath());
+            }
         }
-        
+
         static bool IsPythonInstalled()
         {
             return GetPython() != null;

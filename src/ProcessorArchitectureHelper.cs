@@ -10,8 +10,13 @@ namespace WakaTime
 
         public static bool InternalCheckIsWow64()
         {
+            // Use fully managed 64-bit process detection on platforms other than Windows
+            if (PlatformID.Win32NT != Environment.OSVersion.Platform)
+                return  (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess);
+
             if ((Environment.OSVersion.Version.Major != 5 || Environment.OSVersion.Version.Minor < 1) &&
-                Environment.OSVersion.Version.Major < 6) return false;
+                Environment.OSVersion.Version.Major < 6)
+                return false;
 
             using (var p = Process.GetCurrentProcess())
             {
@@ -21,3 +26,4 @@ namespace WakaTime
         }
     }
 }
+

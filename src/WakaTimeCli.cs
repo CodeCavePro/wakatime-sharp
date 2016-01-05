@@ -13,12 +13,17 @@ namespace WakaTime
     internal static class WakaTimeCli
     {
         const string CliUrl = "https://github.com/wakatime/wakatime/archive/master.zip";
-        const string CliFolder = @"wakatime-master\wakatime\cli.py";
+        static readonly string CliFolder;
         static readonly string ConfigDir;
 
         static WakaTimeCli()
         {
             ConfigDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            CliFolder = string.Join(Path.DirectorySeparatorChar.ToString(), new[]{
+                "wakatime-master",
+                "wakatime",
+                "cli.py"
+            });
         }
 
         public static void Initialize()
@@ -121,7 +126,8 @@ namespace WakaTime
         {
             Logger.Debug("Downloading wakatime cli...");
 
-            var localZipFile = Path.Combine(ConfigDir, "wakatime-cli.zip");
+            var tempDir = Path.GetTempPath();
+            var localZipFile = Path.Combine(tempDir, "wakatime-cli.zip");
             var client = new WebClient
             {
                 Proxy = WakaTimeConfigFile.GetProxy() // Check for proxy setting
