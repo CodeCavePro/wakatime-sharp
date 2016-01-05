@@ -37,9 +37,17 @@ namespace WakaTime
         {
             try
             {
+                Logger.Initialize(GetLogger());
+            }
+            catch
+            {
+                Logger.Initialize(GetConsoleLogger()); // fallback on console logger
+            }
+
+            try
+            {
                 editorInfo = GetEditorInfo();
 
-                Logger.Initialize(GetLogger());
                 Logger.Info(string.Format("Initializing WakaTime v{0}", editorInfo.PluginVersion));
 
                 PythonManager.Initialize();
@@ -59,6 +67,19 @@ namespace WakaTime
             catch (Exception ex)
             {
                 Logger.Error("Error initializing Wakatime", ex);
+            }
+        }
+
+        private static ILogService GetConsoleLogger()
+        {
+            return new ConsoleLogger();
+        }
+
+        class ConsoleLogger : ILogService
+        {
+            public void Log(string message)
+            {
+                Console.WriteLine(message);
             }
         }
 
