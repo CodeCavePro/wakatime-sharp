@@ -38,19 +38,19 @@ namespace WakaTime
         /// Gets or sets the API key.
         /// </summary>
         /// <value>The API key.</value>
-        internal static string ApiKey { get; set; }
+        public static string ApiKey { get; set; }
 
         /// <summary>
         /// Gets or sets the proxy.
         /// </summary>
         /// <value>The proxy.</value>
-        internal static string Proxy { get; set; }
+        public static string Proxy { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether this <see cref="WakaTime.WakaTimeConfigFile"/> is debug.
         /// </summary>
         /// <value><c>true</c> if debug; otherwise, <c>false</c>.</value>
-        internal static bool Debug { get; set; }
+        public static bool Debug { get; set; }
 
         #endregion
 
@@ -59,7 +59,7 @@ namespace WakaTime
         /// <summary>
         /// Read the settings.
         /// </summary>
-        internal static void Read()
+        public static void Read()
         {
             if (!_configData.Sections.ContainsSection("settings"))
                 _configData.Sections.Add(new SectionData("settings"));
@@ -73,7 +73,7 @@ namespace WakaTime
         /// <summary>
         /// Save the settings.
         /// </summary>
-        internal static void Save()
+        public static void Save()
         {
             if (!_configData.Sections.ContainsSection("settings"))
                 _configData.Sections.Add(new SectionData("settings"));

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Threading.Tasks;
-using WakaTime.Forms;
 
 namespace WakaTime
 {
@@ -138,12 +137,12 @@ namespace WakaTime
             };
 
             Task.Run(() =>
-            {
-                lock (threadLock)
                 {
-                    WakaTimeCli.SendHeartbeat(args);
-                }
-            });
+                    lock (threadLock)
+                    {
+                        WakaTimeCli.SendHeartbeat(args);
+                    }
+                });
 
             lastFile = currentFile;
             lastHeartbeat = DateTime.UtcNow;
@@ -154,21 +153,9 @@ namespace WakaTime
             return lastHeartbeat < DateTime.UtcNow.AddMinutes(-1);
         }
 
-        public void PromptApiKey()
-        {
-            using (var form = new ApiKeyForm())
-            {
-                form.Show();
-            }
-        }
+        public abstract void PromptApiKey();
 
-        public void SettingsPopup()
-        {
-            using (var form = new SettingsForm())
-            {
-                form.Show();
-            }
-        }
+        public abstract void SettingsPopup();
 
         protected string GetProjectName()
         {
