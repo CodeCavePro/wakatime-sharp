@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace WakaTime
@@ -50,6 +51,10 @@ namespace WakaTime
                 BindEditorEvents();
 
                 Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
+            }
+            catch (WebException ex)
+            {
+                Logger.Error("Are you behind a proxy? Try setting a proxy in WakaTime Settings with format https://user:pass@host:port. Exception Traceback:", ex);
             }
             catch (Exception ex)
             {
