@@ -2,7 +2,7 @@
 <package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <id>WakaTime</id>
-    <version>8.0.0</version>
+    <version>8.0.1</version>
     <authors>Alan Hamlett, Vivek C, Carlos Henrique, Zhmayev Yaroslav</authors>
     <owners>WakaTime</owners>
     <licenseUrl>https://github.com/CodeCavePro/wakatime-sharp/master/LICENSE.txt</licenseUrl>
@@ -23,7 +23,6 @@
     <file src="..\bin\Release\WakaTime*.dll" target="lib\net45\" /> 
     <file src="..\bin\Release\WakaTime*.pdb" target="lib\net45\" />
     <file src="..\bin\Release\WakaTime*.xml" target="content\docs" />
-    <file src="..\content\" target="content" />
     <file src="tools\" target="tools" />
   </files>
 </package>
