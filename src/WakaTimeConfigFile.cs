@@ -67,7 +67,7 @@ namespace WakaTime
             ApiKey = _configData["settings"]["api_key"] ?? string.Empty;
             Proxy = _configData["settings"]["proxy"] ?? string.Empty;
             var debugRaw = _configData["settings"]["debug"];
-            Debug = (debugRaw == null || debugRaw.Equals(true.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            Debug = (debugRaw != null && debugRaw.Equals(true.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace WakaTime
         static string GetConfigFilePath()
         {
             var userHomeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            return Path.Combine(userHomeDir,".wakatime.cfg");
+            return Path.Combine(userHomeDir, ".wakatime.cfg");
         }
 
         #endregion
