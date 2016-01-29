@@ -51,15 +51,6 @@
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DelaySign>true</DelaySign>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="INIFileParser">
       <HintPath>..\packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
@@ -85,9 +76,7 @@
     <Compile Include="WakaTimeConfigFile.cs" />
     <Compile Include="WakaTimeIdePlugin.cs" />
     <None Include="app.config" />
-    <None Include="Key.snk" />
     <None Include="packages.config" />
-    <None Include="wakatime.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
