@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace WakaTime
 {
@@ -28,19 +24,23 @@ namespace WakaTime
 
         public static void Initialize()
         {
-            if (DoesCliExist() && IsCliLatestVersion())
-                return;
-
-            try
+            if (!DoesCliExist() || !IsCliLatestVersion())
             {
-                Directory.Delete(ConfigDir + "wakatime-master", true);
+                try
+                {
+                    var cliFolder = Path.Combine(ConfigDir, "wakatime-master");
+                    if (Directory.Exists(cliFolder))
+                        Directory.Delete(cliFolder, true);
+                }
+                finally
+                {
+                    DownloadCli();
+                }
             }
-            catch
+            else
             {
-                /* ignored */
+                OnInitialized();
             }
-
-            DownloadCli();
         }
 
         internal static string GetCliPath()
@@ -134,18 +134,38 @@ namespace WakaTime
             };
 
             // Download wakatime cli
-            client.DownloadFile(CliUrl, localZipFile);
-
-            Logger.Debug("Finished downloading wakatime cli.");
-
-            // Extract wakatime cli zip file
-            ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
-
-            try
+            DownloadProgress.Show(CliUrl);
+            client.DownloadProgressChanged += (s, e) => { DownloadProgress.Report(e); };
+            client.DownloadFileCompleted += (s, e) => 
             {
-                File.Delete(localZipFile);
-            }
-            catch { /* ignored */ }
+                try
+                {
+                    DownloadProgress.Complete(e);
+                    Logger.Debug("Finished downloading wakatime cli.");
+
+                    // Extract wakatime cli zip file
+                    ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
+                    Logger.Debug(string.Format("Finished extracting wakatime cli: {0}", GetCliPath()));
+
+                    // Delete downloaded file
+                    File.Delete(localZipFile);
+                }
+                finally
+                {
+                    OnInitialized();
+                }
+            };
+
+            client.DownloadFileAsync(new Uri(CliUrl), localZipFile);
         }
+
+        private static void OnInitialized()
+        {
+            var handler = Initialized;
+            if (handler != null)
+                handler.Invoke(null, EventArgs.Empty);
+        }
+
+        public static event EventHandler<EventArgs> Initialized;
     }
 }

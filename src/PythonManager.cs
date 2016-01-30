@@ -15,10 +15,14 @@ namespace WakaTime
         internal static void Initialize()
         {
             // Make sure python is installed
-            if (IsPythonInstalled())
-                return;
-
-            DownloadPython();
+            if (!IsPythonInstalled())
+            {
+                DownloadPython();
+            }
+            else
+            {
+                OnInitialized();
+            }
         }
 
         internal static string GetPython()
@@ -194,20 +198,39 @@ namespace WakaTime
             };
 
             // Download embeddable python
-            client.DownloadFile(PythonDownloadUrl, localFile);
-
-            Logger.Debug("Finished downloading python.");
-
-            // Extract wakatime cli zip file
-            var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            ZipFile.ExtractToDirectory(localFile, Path.Combine(localAppDataPath, "python"));
-            Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(localAppDataPath, "python")));
-
-            try
+            DownloadProgress.Show(PythonDownloadUrl);
+            client.DownloadProgressChanged += (s, e) => { DownloadProgress.Report(e); };
+            client.DownloadFileCompleted += (s, e) => 
             {
-                File.Delete(localFile);
-            }
-            catch { /* ignored */ }
+                try
+                {
+                    DownloadProgress.Complete(e);
+                    Logger.Debug("Finished downloading python.");
+
+                    // Extract wakatime cli zip file
+                    var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                    ZipFile.ExtractToDirectory(localFile, Path.Combine(localAppDataPath, "python"));
+                    Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(localAppDataPath, "python")));
+
+                    // Delete downloaded file
+                    File.Delete(localFile);
+                }
+                finally
+                {
+                    OnInitialized();
+                }
+            };
+
+            client.DownloadFileAsync(new Uri(PythonDownloadUrl), localFile);            
         }
+
+        private static void OnInitialized()
+        {
+            var handler = Initialized;
+            if (handler != null)
+                handler.Invoke(null, EventArgs.Empty);
+        }
+
+        public static event EventHandler<EventArgs> Initialized;
     }
 }

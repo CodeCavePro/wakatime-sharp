@@ -15,5 +15,7 @@
         void OnDocumentChanged(string documentName);
 
         void OnSolutionOpened(string solutionName);
+
+        IDownloadProgressReporter GetReporter();
     }
 }

@@ -50,15 +50,23 @@ namespace WakaTime
 
                 Logger.Info(string.Format("Initializing WakaTime v{0}", editorInfo.PluginVersion));
 
+                WakaTimeCli.Initialized += (s, e) => 
+                {
+                    if (string.IsNullOrEmpty(WakaTimeConfigFile.ApiKey))
+                        PromptApiKey();
+
+                    BindEditorEvents();
+
+                    Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
+                };
+
+                PythonManager.Initialized += (s, e) => 
+                {
+                    WakaTimeCli.Initialize();
+                };
+
+                DownloadProgress.Initialize(() => { return GetReporter(); });
                 PythonManager.Initialize();
-                WakaTimeCli.Initialize();
-
-                if (string.IsNullOrEmpty(WakaTimeConfigFile.ApiKey))
-                    PromptApiKey();
-
-                BindEditorEvents();
-
-                Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
             }
             catch (WebException ex)
             {
@@ -201,6 +209,8 @@ namespace WakaTime
         }
 
         public abstract void Dispose(bool disposing);
+
+        public abstract IDownloadProgressReporter GetReporter();
 
         #endregion
     }
