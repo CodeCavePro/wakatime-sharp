@@ -33,8 +33,15 @@ namespace WakaTime
             if (_progressReporter == null)
                 return;
 
-            _progressReporter.Close(e);
-            _progressReporter.Dispose();
+            try
+            {
+                _progressReporter.Close(e);
+                _progressReporter.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error(ex.Message);
+            }
         }
     }
 
