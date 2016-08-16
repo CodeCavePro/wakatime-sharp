@@ -50,7 +50,7 @@ namespace WakaTime
 
                 Logger.Info(string.Format("Initializing WakaTime v{0}", editorInfo.PluginVersion));
 
-                WakaTimeCli.Initialized += (s, e) => 
+                WakaTimeCli.Initialized += (s, e) =>
                 {
                     if (string.IsNullOrEmpty(WakaTimeConfigFile.ApiKey))
                         PromptApiKey();
@@ -60,7 +60,7 @@ namespace WakaTime
                     Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
                 };
 
-                PythonManager.Initialized += (s, e) => 
+                PythonManager.Initialized += (s, e) =>
                 {
                     WakaTimeCli.Initialize();
                 };
@@ -108,8 +108,8 @@ namespace WakaTime
             try
             {
                 var solutionName = GetActiveSolutionPath();
-                if (string.IsNullOrWhiteSpace(solutionName))
-                    return;
+                // if (string.IsNullOrWhiteSpace(solutionName))
+                //    return;
 
                 HandleActivity(documentName, false);
             }
@@ -124,8 +124,8 @@ namespace WakaTime
             try
             {
                 var solutionName = GetActiveSolutionPath();
-                if (string.IsNullOrWhiteSpace(solutionName))
-                    return;
+                // if (string.IsNullOrWhiteSpace(solutionName))
+                //    return;
 
                 HandleActivity(documentName, true);
             }
@@ -158,7 +158,7 @@ namespace WakaTime
         {
             if (currentFile == null)
                 return;
-            
+
             if (!isWrite && lastFile != null && !IsEnoughTimePassed() && currentFile.Equals(lastFile))
                 return;
 
