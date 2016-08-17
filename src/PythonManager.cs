@@ -9,7 +9,7 @@ namespace WakaTime
 {
     static class PythonManager
     {
-        private const string CurrentPythonVersion = "3.5.0";
+        private const string CurrentPythonVersion = "3.5.1";
         private static string PythonBinaryLocation { get; set; }
 
         internal static void Initialize()
@@ -151,10 +151,22 @@ namespace WakaTime
             return null;
         }
 
+        static string GetAppDataDirectory()
+        {
+            var roamingFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var appFolder = Path.Combine(roamingFolder, "WakaTime");
+
+            // Create folder if it does not exist
+            if (!Directory.Exists(appFolder))
+                Directory.CreateDirectory(appFolder);
+
+            return appFolder;
+        }
+
         static string GetEmbeddedPath()
         {
-            var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var path = Path.Combine(localAppDataPath, "python", "pythonw");
+            var appDataPath = GetAppDataDirectory();
+            var path = Path.Combine(appDataPath, "python", "pythonw");
             try
             {
                 var process = new RunProcess(path, "--version");
@@ -179,9 +191,7 @@ namespace WakaTime
         {
             get
             {
-                var arch = "win32";
-                if (ProcessorArchitectureHelper.Is64BitOperatingSystem)
-                    arch = "amd64";
+                var arch = ProcessorArchitectureHelper.Is64BitOperatingSystem ? "amd64" : "win32";
                 return string.Format("https://www.python.org/ftp/python/{0}/python-{0}-embed-{1}.zip", CurrentPythonVersion, arch);
             }
         }
@@ -200,7 +210,7 @@ namespace WakaTime
             // Download embeddable python
             DownloadProgress.Show(PythonDownloadUrl);
             client.DownloadProgressChanged += (s, e) => { DownloadProgress.Report(e); };
-            client.DownloadFileCompleted += (s, e) => 
+            client.DownloadFileCompleted += (s, e) =>
             {
                 try
                 {
@@ -208,9 +218,9 @@ namespace WakaTime
                     Logger.Debug("Finished downloading python.");
 
                     // Extract wakatime cli zip file
-                    var localAppDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                    ZipFile.ExtractToDirectory(localFile, Path.Combine(localAppDataPath, "python"));
-                    Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(localAppDataPath, "python")));
+                    var appDataPath = GetAppDataDirectory();
+                    ZipFile.ExtractToDirectory(localFile, Path.Combine(appDataPath, "python"));
+                    Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(appDataPath, "python")));
 
                     // Delete downloaded file
                     File.Delete(localFile);
@@ -221,7 +231,7 @@ namespace WakaTime
                 }
             };
 
-            client.DownloadFileAsync(new Uri(PythonDownloadUrl), localFile);            
+            client.DownloadFileAsync(new Uri(PythonDownloadUrl), localFile);
         }
 
         private static void OnInitialized()

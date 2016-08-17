@@ -18,7 +18,7 @@ namespace WakaTime
 
         static WakaTimeCli()
         {
-            ConfigDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            ConfigDir = GetAppDataDirectory();
             CliFolder = string.Join(Path.DirectorySeparatorChar.ToString(), new[]{
                 "wakatime-master",
                 "wakatime",
@@ -45,6 +45,18 @@ namespace WakaTime
             {
                 OnInitialized();
             }
+        }
+
+        private static string GetAppDataDirectory()
+        {
+            var roamingFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var appFolder = Path.Combine(roamingFolder, "WakaTime");
+
+            // Create folder if it does not exist
+            if (!Directory.Exists(appFolder))
+                Directory.CreateDirectory(appFolder);
+
+            return appFolder;
         }
 
         internal static string GetCliPath()
