@@ -36,7 +36,6 @@ namespace WakaTime
             try
             {
                 _progressReporter.Close(e);
-                _progressReporter.Dispose();
             }
             catch (Exception ex)
             {
