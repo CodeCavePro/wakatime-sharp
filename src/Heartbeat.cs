@@ -1,24 +1,44 @@
 ﻿using System;
+using System.Runtime.Serialization;
 
 namespace WakaTime
 {
-    internal class Heartbeat
+    [DataContract]
+    public class Heartbeat
     {
-        public string entity { get; set; }
-        public string timestamp { get; set; }
-        public string project { get; set; }
-        public bool is_write { get; set; }
+        [DataMember(Name = "entity")]
+        public string FileName { get; internal set; }
 
-        public Heartbeat()
+        [DataMember(Name = "timestamp")]
+        public string Timestamp { get { return ToUnixEpoch(DateTime); } }
+
+        [IgnoreDataMember]
+        public DateTime DateTime { get; internal set; }
+
+        [DataMember(Name = "project")]
+        public string Project { get; internal set; }
+
+        [DataMember(Name = "is_write")]
+        public bool IsWrite { get; internal set; }
+
+        public Heartbeat Clone()
         {
+            return new Heartbeat
+            {
+                FileName = FileName,
+                DateTime = DateTime,
+                Project = Project,
+                IsWrite = IsWrite,
+            };
         }
 
-        internal Heartbeat(Heartbeat h)
+        private static string ToUnixEpoch(DateTime date)
         {
-            entity = h.entity;
-            timestamp = h.timestamp;
-            project = h.project;
-            is_write = h.is_write;
+            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan timestamp = date - epoch;
+            long seconds = Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
+            string milliseconds = timestamp.ToString("ffffff");
+            return string.Format("{0}.{1}", seconds, milliseconds);
         }
     }
 }

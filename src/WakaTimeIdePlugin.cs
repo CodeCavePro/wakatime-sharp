@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using System.Timers;
+using System.Linq;
+using System.Web.Script.Serialization;
+using System.Collections.Generic;
 
 namespace WakaTime
 {
@@ -12,11 +17,15 @@ namespace WakaTime
         protected string lastFile;
         protected string lastSolutionName;
 
-        protected DateTime lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
+        protected DateTime lastHeartbeat;
         protected readonly object threadLock = new object();
 
-        protected EditorInfo editorInfo;
+        protected static EditorInfo editorInfo;
         protected T editorObj;
+
+        const int heartbeatFrequency = 2; // minutes
+        protected static ConcurrentQueue<Heartbeat> heartbeatQueue;
+        protected static Timer timer;
 
         #endregion
 
@@ -25,6 +34,10 @@ namespace WakaTime
         protected WakaTimeIdePlugin(T editor)
         {
             editorObj = editor;
+            lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
+            heartbeatQueue = new ConcurrentQueue<Heartbeat>();
+            timer = new Timer();
+
             Initialize();
         }
 
@@ -56,6 +69,11 @@ namespace WakaTime
                         PromptApiKey();
 
                     BindEditorEvents();
+
+                    // Setup timer to process queued heartbeats every 8 seconds
+                    timer.Interval = 1000 * 8;
+                    timer.Elapsed += ProcessHeartbeats;
+                    timer.Start();
 
                     Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
                 };
@@ -156,35 +174,132 @@ namespace WakaTime
 
         protected void HandleActivity(string currentFile, bool isWrite)
         {
-            if (currentFile == null)
-                return;
-
-            if (!isWrite && lastFile != null && !IsEnoughTimePassed() && currentFile.Equals(lastFile))
-                return;
-
-            var args = new PythonCliParameters
+            try
             {
-                File = currentFile,
-                Plugin = string.Format("{0}/{1} {2}/{3}", editorInfo.Name, editorInfo.Version, editorInfo.PluginName, editorInfo.PluginVersion),
-                IsWrite = isWrite,
-                Project = GetProjectName()
+                if (currentFile == null)
+                    return;
+
+                if (!isWrite && lastFile != null && !IsEnoughTimePassed() && currentFile.Equals(lastFile))
+                    return;
+
+                lastFile = currentFile;
+                lastHeartbeat = DateTime.UtcNow;
+
+                AppendHeartbeat(currentFile, isWrite, DateTime.UtcNow, GetProjectName());
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Error appending heartbeat", ex);
+            }
+        }
+
+        private static void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project = null)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    var heartbeat = new Heartbeat
+                    {
+                        FileName = fileName,
+                        DateTime = time,
+                        IsWrite = isWrite,
+                        Project = project
+                    };
+                    heartbeatQueue.Enqueue(heartbeat);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Error appending heartbeat", ex);
+                }
+            });
+        }
+
+        private static void ProcessHeartbeats(object sender, ElapsedEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    ProcessHeartbeats();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Error processing heartbeats", ex);
+                }
+            });
+        }
+
+        private static void ProcessHeartbeats()
+        {
+            var pythonBinary = PythonManager.GetPython();
+            if (string.IsNullOrWhiteSpace(pythonBinary))
+            {
+                Logger.Error("Could not send heartbeat because python is not installed");
+                return;
+            }
+
+            // get first heartbeat from queue
+            Heartbeat heartbeat;
+            bool gotOne = heartbeatQueue.TryDequeue(out heartbeat);
+            if (!gotOne)
+                return;
+
+            // remove all extra heartbeats from queue
+            var extraHeartbeats = new List<Heartbeat>();
+            Heartbeat hbOut;
+            while (heartbeatQueue.TryDequeue(out hbOut))
+            {
+                extraHeartbeats.Add(hbOut.Clone());
+            }
+
+            bool hasExtraHeartbeats = extraHeartbeats.Any();
+            var cliParams = new PythonCliParameters
+            {
+                Key = WakaTimeConfigFile.ApiKey,
+                Plugin = string.Format("{0}/{1} {2}/{3}", editorInfo.Name, editorInfo.Version, editorInfo.PluginKey, editorInfo.PluginVersion),
+                File = heartbeat.FileName,
+                Time = heartbeat.Timestamp,
+                IsWrite = heartbeat.IsWrite,
+                HasExtraHeartbeats = hasExtraHeartbeats,
             };
 
-            Task.Run(() =>
-                {
-                    lock (threadLock)
-                    {
-                        WakaTimeCli.SendHeartbeat(args);
-                    }
-                });
+            string extraHeartbeatsJSON = null;
+            if (hasExtraHeartbeats)
+            {
+                var serializer = new JavaScriptSerializer();
+                serializer.RegisterConverters(new JavaScriptConverter[] { new DataContractJavaScriptConverter(true) });
+                extraHeartbeatsJSON = serializer.Serialize(extraHeartbeats);
+            }
 
-            lastFile = currentFile;
-            lastHeartbeat = DateTime.UtcNow;
+            var process = new RunProcess(pythonBinary, cliParams.ToArray());
+            if (WakaTimeConfigFile.Debug)
+            {
+                Logger.Debug(string.Format("[\"{0}\", \"{1}\"]", pythonBinary, string.Join("\", \"", cliParams.ToArray(true))));
+                process.Run(extraHeartbeatsJSON);
+                if (process.Output != null && process.Output != "")
+                    Logger.Debug(process.Output);
+                if (process.Error != null && process.Error != "")
+                    Logger.Debug(process.Error);
+            }
+            else
+            {
+                process.RunInBackground(extraHeartbeatsJSON);
+            }
+
+            if (!process.Success)
+            {
+                Logger.Error("Could not send heartbeat.");
+                if (process.Output != null && process.Output != "")
+                    Logger.Error(process.Output);
+                if (process.Error != null && process.Error != "")
+                    Logger.Error(process.Error);
+            }
         }
 
         protected bool IsEnoughTimePassed()
         {
-            return lastHeartbeat < DateTime.UtcNow.AddMinutes(-1);
+            return lastHeartbeat < DateTime.UtcNow.AddMinutes(-1 * heartbeatFrequency);
         }
 
         public abstract void PromptApiKey();

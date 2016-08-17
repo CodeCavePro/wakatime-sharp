@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
+using Timer = System.Timers.Timer;
 
 namespace WakaTime
 {
@@ -136,7 +140,7 @@ namespace WakaTime
             // Download wakatime cli
             DownloadProgress.Show(CliUrl);
             client.DownloadProgressChanged += (s, e) => { DownloadProgress.Report(e); };
-            client.DownloadFileCompleted += (s, e) => 
+            client.DownloadFileCompleted += (s, e) =>
             {
                 try
                 {

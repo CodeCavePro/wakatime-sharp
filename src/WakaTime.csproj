@@ -67,11 +67,15 @@
     <Reference Include="System" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataContractJavaScriptConverter.cs" />
     <Compile Include="EditorInfo.cs" />
+    <Compile Include="Heartbeat.cs" />
     <Compile Include="ILogService.cs" />
     <Compile Include="IWakaTimeIdePlugin.cs" />
     <Compile Include="Logger.cs" />

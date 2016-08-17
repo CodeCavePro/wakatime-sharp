@@ -8,6 +8,8 @@ namespace WakaTime
 
         public Version Version { get; set; }
 
+        public string PluginKey { get; set; }
+
         public string PluginName { get; set; }
 
         public Version PluginVersion { get; set; }
