@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net35;net45</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0;net35;net45</TargetFrameworks>
         <Version>8.0.0</Version>
         <AssemblyVersion>8.0.0</AssemblyVersion>
         <FileVersion>8.0.0</FileVersion>
@@ -52,7 +52,7 @@
 
     <ItemGroup>
         <PackageReference Include="ini-parser" Version="2.2.4" />
-        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" Condition="'$(TargetFramework)' == 'net35'" />
+        <PackageReference Include="Newtonsoft.Json" Version="11.0.2" Condition="'$(TargetFramework)' != 'net45'" />
         <PackageReference Include="AsyncBridge.Net35" Version="0.3.1" Condition="'$(TargetFramework)' == 'net35'" />
         <PackageReference Include="DotNetZip" Version="1.11.0" Condition="'$(TargetFramework)' == 'net35'" />
         <PackageReference Include="TaskParallelLibrary" Version="1.0.2856.0" Condition="'$(TargetFramework)' == 'net35'" />

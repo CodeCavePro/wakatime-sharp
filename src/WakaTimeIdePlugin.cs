@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
-#if NET35
-using Newtonsoft.Json;
-#else
+#if NET45
 using System.Web.Script.Serialization;
+#else
+using Newtonsoft.Json;
 #endif
 
 namespace WakaTime
@@ -296,12 +296,12 @@ namespace WakaTime
             string extraHeartbeatsJSON = null;
             if (hasExtraHeartbeats)
             {
-#if NET35
-                extraHeartbeatsJSON = JsonConvert.SerializeObject(extraHeartbeats, Formatting.None);
-#else
+#if NET45
                 var serializer = new JavaScriptSerializer();
                 serializer.RegisterConverters(new JavaScriptConverter[] { new DataContractJavaScriptConverter(true) });
                 extraHeartbeatsJSON = serializer.Serialize(extraHeartbeats);
+#else
+                extraHeartbeatsJSON = JsonConvert.SerializeObject(extraHeartbeats, Formatting.None);
 #endif
             }
 

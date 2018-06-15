@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-#if NET35
+#if !NET45
 using Newtonsoft.Json;
 #endif
 
@@ -11,35 +11,35 @@ namespace WakaTime
     public class Heartbeat
     {
 
-#if NET35
+#if !NET45
         [JsonProperty(PropertyName = "entity")]
 #else
         [DataMember(Name = "entity")]
 #endif
         public string FileName { get; internal set; }
 
-#if NET35
+#if !NET45
         [JsonProperty(PropertyName = "timestamp")]
 #else
         [DataMember(Name = "timestamp")]
 #endif
         public string Timestamp { get { return ToUnixEpoch(DateTime); } }
 
-#if NET35
+#if !NET45
         [JsonIgnore]
 #else
         [IgnoreDataMember]
 #endif
         public DateTime DateTime { get; internal set; }
 
-#if NET35
+#if !NET45
         [JsonProperty(PropertyName = "project")]
 #else
         [DataMember(Name = "project")]
 #endif
         public string Project { get; internal set; }
 
-#if NET35
+#if !NET45
         [JsonProperty(PropertyName = "is_write")]
 #else
         [DataMember(Name = "is_write")]
@@ -63,7 +63,7 @@ namespace WakaTime
             TimeSpan timestamp = date - epoch;
             long seconds = Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
             string milliseconds =
-#if NET35
+#if !NET45
                 string.Format("{0:00}:{1:00}:{2:00}",
                    (int)timestamp.TotalHours,
                         timestamp.Minutes,

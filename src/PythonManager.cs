@@ -55,6 +55,7 @@ namespace WakaTime
 
         static string GetPathFromMicrosoftRegistry()
         {
+#if !NETSTANDARD
             try
             {
                 var regex = new Regex(@"""([^""]*)\\([^""\\]+(?:\.[^"".\\]+))""");
@@ -87,6 +88,9 @@ namespace WakaTime
                 Logger.Error("GetPathFromMicrosoftRegistry:", ex);
                 return null;
             }
+#else
+            return null;
+#endif
         }
 
         static string GetPathFromFixedPath()
