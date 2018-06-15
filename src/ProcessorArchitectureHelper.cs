@@ -12,7 +12,13 @@ namespace WakaTime
         {
             // Use fully managed 64-bit process detection on platforms other than Windows
             if (PlatformID.Win32NT != Environment.OSVersion.Platform)
+            {
+#if NET35
+                return (IntPtr.Size == 8);
+#else
                 return  (Environment.Is64BitOperatingSystem && Environment.Is64BitProcess);
+#endif
+            }
 
             if ((Environment.OSVersion.Version.Major != 5 || Environment.OSVersion.Version.Minor < 1) &&
                 Environment.OSVersion.Version.Major < 6)

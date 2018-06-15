@@ -63,7 +63,7 @@ namespace WakaTime
         {
             if (!_configData.Sections.ContainsSection("settings"))
                 _configData.Sections.Add(new SectionData("settings"));
-            
+
             ApiKey = _configData["settings"]["api_key"] ?? string.Empty;
             Proxy = _configData["settings"]["proxy"] ?? string.Empty;
             var debugRaw = _configData["settings"]["debug"];
@@ -77,16 +77,16 @@ namespace WakaTime
         {
             if (!_configData.Sections.ContainsSection("settings"))
                 _configData.Sections.Add(new SectionData("settings"));
-            
+
             _configData["settings"]["api_key"] = ApiKey.Trim();
             _configData["settings"]["proxy"] = Proxy.Trim();
             _configData["settings"]["debug"] = Debug.ToString(CultureInfo.InvariantCulture).ToLowerInvariant();
             _configParser.WriteFile(_configFilepath, _configData, new UTF8Encoding(false));
         }
 
-        public static WebProxy GetProxy()
+        public static IWebProxy GetProxy()
         {
-            WebProxy proxy = null;
+            var proxy = WebRequest.DefaultWebProxy;
 
             try
             {
@@ -104,7 +104,7 @@ namespace WakaTime
                     var port = match.Groups[5].Value;
 
                     var credentials = new NetworkCredential(username, password);
-                    proxy = new WebProxy(string.Join(":", address, port), true, null, credentials);
+                    proxy = new WebProxy(string.Join(":", new[] { address, port }), true, null, credentials);
 
                     Logger.Debug("A proxy with authentication will be used.");
                     return proxy;
@@ -145,7 +145,14 @@ namespace WakaTime
         /// <returns>The config file path.</returns>
         static string GetConfigFilePath()
         {
-            var userHomeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            var userHomeDir =
+#if NET35
+                (Environment.OSVersion.Platform == PlatformID.Unix || Environment.OSVersion.Platform == PlatformID.MacOSX)
+                    ? Environment.GetEnvironmentVariable("HOME")
+                    : Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+#else
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+#endif
             return Path.Combine(userHomeDir, ".wakatime.cfg");
         }
 

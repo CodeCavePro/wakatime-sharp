@@ -3,10 +3,15 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
 using Timer = System.Timers.Timer;
+
+#if NET35
+using Ionic.Zip;
+#else
+using System.IO.Compression;
+#endif
 
 namespace WakaTime
 {
@@ -106,16 +111,17 @@ namespace WakaTime
         static Version GetLatestWakaTimeCliVersion()
         {
             var regex = new Regex(@"(__version_info__ = )(\(( ?\'[0-9]+\'\,?){3}\))");
-            var client = new WebClient
-            {
-                Proxy = WakaTimeConfigFile.GetProxy()
-            };
+            var aboutFileUrl = new Uri("https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py");
 
             try
             {
-                var about = client.DownloadString("https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py");
-                var match = regex.Match(about);
 
+                var client = new WebClient
+                {
+                    Proxy = WakaTimeConfigFile.GetProxy()
+                };
+                var about = client.DownloadString(aboutFileUrl);
+                var match = regex.Match(about);
                 if (match.Success)
                 {
                     var groupVersion = match.Groups[2];
@@ -126,10 +132,8 @@ namespace WakaTime
                         int.Parse(versionMatch.Groups["minor"].Value),
                         int.Parse(versionMatch.Groups["build"].Value));
                 }
-                else
-                {
-                    Logger.Warning("Couldn't auto resolve wakatime cli version");
-                }
+                Logger.Warning("Couldn't auto resolve wakatime cli version");
+
             }
             catch (Exception ex)
             {
@@ -151,6 +155,7 @@ namespace WakaTime
 
             // Download wakatime cli
             DownloadProgress.Show(CliUrl);
+
             client.DownloadProgressChanged += (s, e) => { DownloadProgress.Report(e); };
             client.DownloadFileCompleted += (s, e) =>
             {
@@ -160,11 +165,23 @@ namespace WakaTime
                     Logger.Debug("Finished downloading wakatime cli.");
 
                     // Extract wakatime cli zip file
-                    ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
+#if NET35
+                    using (var zipFile = new ZipFile(localZipFile))
+                    {
+                        zipFile.ExtractAll(ConfigDir, ExtractExistingFileAction.OverwriteSilently);
+                    }
+#else
+					ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
+#endif
+
                     Logger.Debug(string.Format("Finished extracting wakatime cli: {0}", GetCliPath()));
 
                     // Delete downloaded file
                     File.Delete(localZipFile);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Failed to download and/or extract WakaTime Cli", ex);
                 }
                 finally
                 {
@@ -172,7 +189,16 @@ namespace WakaTime
                 }
             };
 
-            client.DownloadFileAsync(new Uri(CliUrl), localZipFile);
+            Logger.Warning("DownloadProgress.Show");
+
+            try
+            {
+                client.DownloadFileAsync(new Uri(CliUrl), localZipFile);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Failed to download WakaTime Cli", ex);
+            }
         }
 
         private static void OnInitialized()

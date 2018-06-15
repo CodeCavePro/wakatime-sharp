@@ -1,9 +1,14 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
+
+#if NET35
+using Ionic.Zip;
+#else
+using System.IO.Compression;
+#endif
 
 namespace WakaTime
 {
@@ -166,7 +171,9 @@ namespace WakaTime
         static string GetEmbeddedPath()
         {
             var appDataPath = GetAppDataDirectory();
-            var path = Path.Combine(appDataPath, "python", "pythonw");
+            var path = Path.Combine(appDataPath, "python");
+            path = Path.Combine(path, "pythonw");
+
             try
             {
                 var process = new RunProcess(path, "--version");
@@ -219,7 +226,16 @@ namespace WakaTime
 
                     // Extract wakatime cli zip file
                     var appDataPath = GetAppDataDirectory();
+
+                    // Extract wakatime cli zip file
+#if NET35
+                    using (var zipFile = new ZipFile(localFile))
+                    {
+                        zipFile.ExtractAll(Path.Combine(appDataPath, "python"), ExtractExistingFileAction.OverwriteSilently);
+                    }
+#else
                     ZipFile.ExtractToDirectory(localFile, Path.Combine(appDataPath, "python"));
+#endif
                     Logger.Debug(string.Format("Finished extracting python: {0}", Path.Combine(appDataPath, "python")));
 
                     // Delete downloaded file

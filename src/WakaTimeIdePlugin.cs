@@ -1,18 +1,23 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using System.Timers;
 using System.Linq;
-using System.Web.Script.Serialization;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
+
+#if NET35
+using Newtonsoft.Json;
+#else
+using System.Web.Script.Serialization;
+#endif
 
 namespace WakaTime
 {
     public abstract class WakaTimeIdePlugin<T> : IWakaTimeIdePlugin, IDisposable
     {
-        #region Fields
+#region Fields
 
         protected string lastFile;
         protected string lastSolutionName;
@@ -27,9 +32,9 @@ namespace WakaTime
         protected static ConcurrentQueue<Heartbeat> heartbeatQueue;
         protected static Timer timer;
 
-        #endregion
+#endregion
 
-        #region Startup/Cleanup
+#region Startup/Cleanup
 
         protected WakaTimeIdePlugin(T editor)
         {
@@ -78,13 +83,14 @@ namespace WakaTime
                     Logger.Info(string.Format("Finished initializing WakaTime v{0}", editorInfo.PluginVersion));
                 };
 
+                DownloadProgress.Initialize(() => { return GetReporter(); });
+
                 PythonManager.Initialized += (s, e) =>
                 {
                     WakaTimeCli.Initialize();
                 };
 
-                DownloadProgress.Initialize(() => { return GetReporter(); });
-                PythonManager.Initialize();
+                CheckPrerequisites();
             }
             catch (WebException ex)
             {
@@ -94,6 +100,11 @@ namespace WakaTime
             {
                 Logger.Error("Error initializing Wakatime", ex);
             }
+        }
+
+        public void CheckPrerequisites()
+        {
+            PythonManager.Initialize();
         }
 
         private static ILogService GetConsoleLogger()
@@ -117,9 +128,9 @@ namespace WakaTime
 
         public abstract string GetActiveSolutionPath();
 
-        #endregion
+#endregion
 
-        #region Event Handlers
+#region Event Handlers
 
         public void OnDocumentOpened(string documentName)
         {
@@ -157,8 +168,14 @@ namespace WakaTime
         {
             try
             {
+#if NET35
+                if (solutionPath == null || string.IsNullOrEmpty(solutionPath.Trim()))
+#else
                 if (string.IsNullOrWhiteSpace(solutionPath))
+#endif
+                {
                     return;
+                }
 
                 lastSolutionName = solutionPath;
             }
@@ -168,9 +185,9 @@ namespace WakaTime
             }
         }
 
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
 
         protected void HandleActivity(string currentFile, bool isWrite)
         {
@@ -195,7 +212,11 @@ namespace WakaTime
 
         private static void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project = null)
         {
+#if NET35
+            Task.Factory.StartNew(() =>
+#else
             Task.Run(() =>
+#endif
             {
                 try
                 {
@@ -217,7 +238,11 @@ namespace WakaTime
 
         private static void ProcessHeartbeats(object sender, ElapsedEventArgs e)
         {
+#if NET35
+            Task.Factory.StartNew(() =>
+#else
             Task.Run(() =>
+#endif
             {
                 try
                 {
@@ -233,7 +258,11 @@ namespace WakaTime
         private static void ProcessHeartbeats()
         {
             var pythonBinary = PythonManager.GetPython();
+#if NET35
+            if (pythonBinary == null || string.IsNullOrEmpty(pythonBinary.Trim()))
+#else
             if (string.IsNullOrWhiteSpace(pythonBinary))
+#endif
             {
                 Logger.Error("Could not send heartbeat because python is not installed");
                 return;
@@ -267,9 +296,13 @@ namespace WakaTime
             string extraHeartbeatsJSON = null;
             if (hasExtraHeartbeats)
             {
+#if NET35
+                extraHeartbeatsJSON = JsonConvert.SerializeObject(extraHeartbeats, Formatting.None);
+#else
                 var serializer = new JavaScriptSerializer();
                 serializer.RegisterConverters(new JavaScriptConverter[] { new DataContractJavaScriptConverter(true) });
                 extraHeartbeatsJSON = serializer.Serialize(extraHeartbeats);
+#endif
             }
 
             var process = new RunProcess(pythonBinary, cliParams.ToArray());
@@ -306,13 +339,13 @@ namespace WakaTime
 
         public abstract void SettingsPopup();
 
-        protected string GetProjectName()
+        public virtual string GetProjectName()
         {
             if (!string.IsNullOrEmpty(lastSolutionName))
                 return Path.GetFileNameWithoutExtension(lastSolutionName);
 
             var solutionPath = GetActiveSolutionPath();
-            return (string.IsNullOrWhiteSpace(solutionPath))
+            return (string.IsNullOrEmpty(solutionPath))
                 ? (lastSolutionName = Path.GetFileNameWithoutExtension(lastSolutionName))
                 : null;
         }
@@ -327,7 +360,7 @@ namespace WakaTime
 
         public abstract IDownloadProgressReporter GetReporter();
 
-        #endregion
+#endregion
     }
 }
 

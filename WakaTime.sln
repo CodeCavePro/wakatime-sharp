@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27729.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WakaTime", "src\WakaTime.csproj", "{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{797C7B9D-CCA9-492B-9A97-AE35C068636B}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		AUTHORS = AUTHORS
+		HISTORY.rst = HISTORY.rst
+		LICENSE.txt = LICENSE.txt
+		nuget.config = nuget.config
+		README.md = README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AB18E1D0-3395-478A-B4ED-DEC12F2A6044}
+	EndGlobalSection
+EndGlobal
