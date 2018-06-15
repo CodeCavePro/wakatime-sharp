@@ -69,6 +69,13 @@ dotnet_csproj:
   package_version: $(VERSION_INFORMATIONAL)
   informational_version: $(VERSION_INFORMATIONAL)
 
+assembly_info:
+  patch: true
+  file: '**\AssemblyInfo.*'
+  assembly_version: $(VERSION_SIMPLE)
+  assembly_file_version: $(VERSION_SIMPLE)
+  assembly_informational_version: $(VERSION_INFORMATIONAL)
+
 build_script:
   - cmd: where dotnet
   - cmd: dotnet build
