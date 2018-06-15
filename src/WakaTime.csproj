@@ -27,6 +27,11 @@
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+        <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
+        <EnableFrameworkPathOverride>true</EnableFrameworkPathOverride>
+    </PropertyGroup>
+
     <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
         <!-- When compiling .NET SDK 2.0 projects targeting .NET 4.x on Mono using 'dotnet build' you -->
         <!-- have to teach MSBuild where the Mono copy of the reference asssemblies is -->
