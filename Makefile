@@ -4,5 +4,7 @@ restore:
 	@dotnet restore
 
 build: restore
-	@msbuild WakaTime.sln
+	@dotnet build
 
+pack: build
+	@dotnet pack
