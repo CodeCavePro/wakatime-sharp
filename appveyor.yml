@@ -26,7 +26,7 @@ init:
 - ps: |
     $env:VERSION_INFORMATIONAL = $env:APPVEYOR_BUILD_VERSION
     $env:VERSION_SIMPLE = "$env:APPVEYOR_BUILD_VERSION.$env:APPVEYOR_BUILD_NUMBER"
-    $env:GITHUB_REPO_API = "https://api.github.com/repos/$env:APPVEYOR_REPO_NAME/releases/latest"
+    $env:GITHUB_REPO_API = "https://api.github.com/repos/$env:APPVEYOR_REPO_NAME/tags"
 
     if ($env:APPVEYOR_REPO_TAG -eq "true" -and $env:APPVEYOR_REPO_TAG_NAME) {
         ### CHECK IF A IT'S A TAGGED BUILD
@@ -41,8 +41,8 @@ init:
         try {
             ### TRY TO GET VERSION FROM THE LATEST GITHUB TAG/REALEASE
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            $github_last_release=(Invoke-WebRequest -Uri $env:GITHUB_REPO_API) -join '`n' | ConvertFrom-Json
-            $github_last_tag=$github_last_release.tag_name.TrimStart("v")
+            $github_latest_tags=(Invoke-WebRequest -Uri $env:GITHUB_REPO_API) -join '`n' | ConvertFrom-Json
+            $github_last_tag=$github_latest_tags[0].name.TrimStart("v")
             if ($github_last_tag -match '^([0-9]+\.[0-9]+\.[0-9]+)$') {
                 $github_tag_ver = [version]$github_last_tag
                 $github_last_tag = "{0}.{1}.{2}" -f $github_tag_ver.Major, $github_tag_ver.Minor, ($github_tag_ver.Build + 1)
