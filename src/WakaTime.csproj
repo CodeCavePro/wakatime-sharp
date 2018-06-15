@@ -32,52 +32,8 @@
     <PackageReference Include="AsyncBridge.Net35" Version="0.3.1" Condition="'$(TargetFramework)' == 'net35'" />
     <PackageReference Include="DotNetZip" Version="1.11.0" Condition="'$(TargetFramework)' == 'net35'" />
     <PackageReference Include="TaskParallelLibrary" Version="1.0.2856.0" Condition="'$(TargetFramework)' == 'net35'" />
-  </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Extensions" Condition="'$(TargetFramework)' == 'net45'" />
   </ItemGroup>
-
-  <ItemGroup>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyCompanyAttribute">
-      <_Parameter1>Microsoft Corporation</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyCopyrightAttribute">
-      <_Parameter1>© Microsoft Corporation. All rights reserved.</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyProductAttribute">
-      <_Parameter1>Microsoft Connected Services</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyConfigurationAttribute">
-      <_Parameter1>$(Configuration)</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyCultureAttribute">
-      <_Parameter1></_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyTrademarkAttribute">
-      <_Parameter1></_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyVersionAttribute">
-      <_Parameter1>$(AssemblyVersion)</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyFileVersionAttribute">
-      <_Parameter1>$(BuildVersion)</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Reflection.AssemblyInformationalVersionAttribute">
-      <_Parameter1>$(BuildVersion)</_Parameter1>
-    </AssemblyVersionAttribute>
-    <AssemblyVersionAttribute Include="System.Resources.NeutralResourcesLanguageAttribute">
-      <_Parameter1>en-US</_Parameter1>
-    </AssemblyVersionAttribute>
-  </ItemGroup>
-
-  <Target Name="GenerateAssemblyInfoFile">
-    <WriteCodeFragment AssemblyAttributes="@(AssemblyVersionAttribute)"
-                       Language="C#"
-                       OutputFile="$(MSBuildProjectDirectory)\GlobalAssemblyInfo.cs">
-      <Output TaskParameter="OutputFile" ItemName="Compile" />
-      <Output TaskParameter="OutputFile" ItemName="FileWrites" />
-    </WriteCodeFragment>
-  </Target>
 
 </Project>
