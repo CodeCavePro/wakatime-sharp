@@ -1,7 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;net35</TargetFrameworks>
+    <TargetFrameworks>net35;net45</TargetFrameworks>
+    <PackOnBuild>true</PackOnBuild>
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <PackageIconUrl>https://github.com/CodeCavePro/wakatime-sharp/blob/master/content/wakatime-120.png</PackageIconUrl>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageLicenseUrl>https://github.com/CodeCavePro/wakatime-sharp/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Owners>CodeCave</Owners>
+    <PackageProjectUrl>https://github.com/codecavepro/wakatime-sharp</PackageProjectUrl>
+    <Summary>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc. This plug-ins will help to collect metrics, insights and time tracking automatically generated directly from your programming activity.</Summary>
+    <PackageTags>wakatime,monodevelop,xamarin studio,ide,visual studio,visual studio for mac,dotnet,unity,notepad++,notepadplusplus,editor,source code,time logging,time,logging,insights,metrics </PackageTags>
+    <Title>WakaTime</Title>
+  </PropertyGroup>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
