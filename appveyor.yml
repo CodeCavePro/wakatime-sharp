@@ -78,8 +78,13 @@ assembly_info:
   assembly_file_version: $(VERSION_SIMPLE)
   assembly_informational_version: $(VERSION_INFORMATIONAL)
 
-build_script:
+# Run scripts below before
+before_build:
   - cmd: where dotnet
+  - cmd: dotnet clean
+
+# Run scripts below before
+build_script:
   - cmd: dotnet build
 
 # NuGet files qualified as artifacts
