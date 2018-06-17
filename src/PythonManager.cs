@@ -4,7 +4,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.Win32;
 
-#if NET35
+#if NET35 || NET40
 using Ionic.Zip;
 #else
 using System.IO.Compression;
@@ -232,7 +232,7 @@ namespace WakaTime
                     var appDataPath = GetAppDataDirectory();
 
                     // Extract wakatime cli zip file
-#if NET35
+#if NET35 || NET40
                     using (var zipFile = new ZipFile(localFile))
                     {
                         zipFile.ExtractAll(Path.Combine(appDataPath, "python"), ExtractExistingFileAction.OverwriteSilently);

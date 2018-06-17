@@ -1,22 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;net35;net45</TargetFrameworks>
-        <Version>8.0.0</Version>
+        <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
+        <OutputPath>..\bin\$(Configuration)\</OutputPath>
+        <AssemblyName>WakaTime</AssemblyName>
         <AssemblyVersion>8.0.0</AssemblyVersion>
-        <FileVersion>8.0.0</FileVersion>
+        <RootNamespace>WakaTime</RootNamespace>
+    </PropertyGroup>
+
+    <PropertyGroup>
         <PackOnBuild>true</PackOnBuild>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageId>WakaTime</PackageId>
+        <Title>WakaTime</Title>
+        <Description>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc</Description>
+        <Summary>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc. This plug-ins will help to collect metrics, insights and time tracking automatically generated directly from your programming activity.</Summary>
+        <Version>8.0.0</Version>
+        <FileVersion>8.0.0</FileVersion>
         <Authors>Zhmayev Yaroslav aka Salaros</Authors>
         <Company>CodeCave, PUE</Company>
         <Owners>salaros,CodeCave</Owners>
         <Copyright>Copyright 2016 (c) CodeCave, PUE</Copyright>
-        <PackageId>WakaTime</PackageId>
-        <RootNamespace>WakaTime</RootNamespace>
-        <AssemblyName>WakaTime</AssemblyName>
-        <Title>WakaTime</Title>
-        <Description>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc</Description>
-        <Summary>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc. This plug-ins will help to collect metrics, insights and time tracking automatically generated directly from your programming activity.</Summary>
         <PackageIconUrl>https://github.com/CodeCavePro/wakatime-sharp/blob/master/content/wakatime-120.png</PackageIconUrl>
         <PackageLicenseUrl>https://github.com/CodeCavePro/wakatime-sharp/blob/master/LICENSE.txt</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -27,36 +31,26 @@
         <NeutralLanguage>en</NeutralLanguage>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
-        <FrameworkPathOverride Condition="'$(TargetFramework)' == 'net35'">$(MSBuildProgramFiles32)\Reference Assemblies\Microsoft\Framework\.NETFramework\v3.5\Profile\Client</FrameworkPathOverride>
-        <EnableFrameworkPathOverride>true</EnableFrameworkPathOverride>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
-        <!-- When compiling .NET SDK 2.0 projects targeting .NET 4.x on Mono using 'dotnet build' you -->
-        <!-- have to teach MSBuild where the Mono copy of the reference asssemblies is -->
-        <TargetIsMono Condition="$(TargetFramework.StartsWith('net'))">true</TargetIsMono>
-        <!-- Look in the standard install locations -->
-        <BaseFrameworkPathOverrideForMono Condition="'$(BaseFrameworkPathOverrideForMono)' == '' AND '$(TargetIsMono)' == 'true' AND EXISTS('/Library/Frameworks/Mono.framework/Versions/Current/lib/mono')">/Library/Frameworks/Mono.framework/Versions/Current/lib/mono</BaseFrameworkPathOverrideForMono>
-        <BaseFrameworkPathOverrideForMono Condition="'$(BaseFrameworkPathOverrideForMono)' == '' AND '$(TargetIsMono)' == 'true' AND EXISTS('/usr/lib/mono')">/usr/lib/mono</BaseFrameworkPathOverrideForMono>
-        <BaseFrameworkPathOverrideForMono Condition="'$(BaseFrameworkPathOverrideForMono)' == '' AND '$(TargetIsMono)' == 'true' AND EXISTS('/usr/local/lib/mono')">/usr/local/lib/mono</BaseFrameworkPathOverrideForMono>
-        <!-- If we found Mono reference assemblies, then use them -->
-        <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net35'">$(BaseFrameworkPathOverrideForMono)/2.0-api</FrameworkPathOverride>
-        <FrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != '' AND '$(TargetFramework)' == 'net45'">$(BaseFrameworkPathOverrideForMono)/4.5-api</FrameworkPathOverride>
-        <EnableFrameworkPathOverride Condition="'$(BaseFrameworkPathOverrideForMono)' != ''">true</EnableFrameworkPathOverride>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <OutputPath>..\bin\$(Configuration)\</OutputPath>
+    <!-- A workaround for "full" .NET Framework targets to try to fallback on Mono before failing -->
+    <PropertyGroup Condition="'$(OS)' != 'Windows_NT' And $(TargetFramework.StartsWith('net'))">
+        <!-- Look up for Mono installations on Linux or macOS -->
+        <MonoPath Condition="'$(MonoPath)' == '' And Exists('/usr/lib/mono')">/usr/lib/mono</MonoPath>
+        <MonoPath Condition="'$(MonoPath)' == '' And Exists('/Library/Frameworks/Mono.framework/Versions/Current/lib/mono')">/Library/Frameworks/Mono.framework/Versions/Current/lib/mono</MonoPath>
+        <!-- Try to apply framework override fo supported targets if Mono was found -->
+        <FrameworkPathOverride Condition="'$(MonoPath)' != '' And '$(TargetFramework)' == 'net40'">$(MonoPath)/4.0-api</FrameworkPathOverride>
+        <FrameworkPathOverride Condition="'$(MonoPath)' != '' And '$(TargetFramework)' == 'net45'">$(MonoPath)/4.5-api</FrameworkPathOverride>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="ini-parser" Version="2.2.4" />
+        <PackageReference Include="Salaros.ConfigParser" Version="0.2.3" />
         <PackageReference Include="Newtonsoft.Json" Version="11.0.2" Condition="'$(TargetFramework)' != 'net45'" />
-        <PackageReference Include="AsyncBridge.Net35" Version="0.3.1" Condition="'$(TargetFramework)' == 'net35'" />
-        <PackageReference Include="DotNetZip" Version="1.11.0" Condition="'$(TargetFramework)' == 'net35'" />
-        <PackageReference Include="TaskParallelLibrary" Version="1.0.2856.0" Condition="'$(TargetFramework)' == 'net35'" />
+        <PackageReference Include="DotNetZip" Version="1.11.0" Condition="'$(TargetFramework)' == 'net40'" />
         <Reference Include="System.Web.Extensions" Condition="'$(TargetFramework)' == 'net45'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' != 'net40'">
+        <Compile Remove="IProgress.cs" />
+        <None Include="IProgress.cs" />
     </ItemGroup>
 
 </Project>

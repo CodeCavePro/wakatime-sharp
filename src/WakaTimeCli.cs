@@ -7,7 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using Timer = System.Timers.Timer;
 
-#if NET35
+#if NET35 || NET40
 using Ionic.Zip;
 #else
 using System.IO.Compression;
@@ -165,7 +165,7 @@ namespace WakaTime
                     Logger.Debug("Finished downloading wakatime cli.");
 
                     // Extract wakatime cli zip file
-#if NET35
+#if NET35 || NET40
                     using (var zipFile = new ZipFile(localZipFile))
                     {
                         zipFile.ExtractAll(ConfigDir, ExtractExistingFileAction.OverwriteSilently);

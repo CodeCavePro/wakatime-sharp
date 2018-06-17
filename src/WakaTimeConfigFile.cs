@@ -1,19 +1,17 @@
 ﻿using System;
 using System.IO;
-using IniParser;
-using IniParser.Model;
 using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
+using Salaros.Config;
 
 namespace WakaTime
 {
     public static class WakaTimeConfigFile
     {
         private static readonly string _configFilepath;
-        private static readonly FileIniDataParser _configParser;
-        private static readonly IniData _configData;
+        private static readonly ConfigParser _configParser;
 
         #region Constructor
 
@@ -22,11 +20,8 @@ namespace WakaTime
         /// </summary>
         static WakaTimeConfigFile()
         {
-            _configParser = new FileIniDataParser();
             _configFilepath = GetConfigFilePath();
-            _configData = (File.Exists(_configFilepath))
-                ? _configParser.ReadFile(_configFilepath, new UTF8Encoding(false))
-                : new IniData();
+            _configParser = new ConfigParser(_configFilepath, new ConfigParserSettings(MultiLineValues.Simple, Encoding.UTF8));
             Read();
         }
 
@@ -61,12 +56,9 @@ namespace WakaTime
         /// </summary>
         public static void Read()
         {
-            if (!_configData.Sections.ContainsSection("settings"))
-                _configData.Sections.Add(new SectionData("settings"));
-
-            ApiKey = _configData["settings"]["api_key"] ?? string.Empty;
-            Proxy = _configData["settings"]["proxy"] ?? string.Empty;
-            var debugRaw = _configData["settings"]["debug"];
+            ApiKey = _configParser.GetValue("settings", "api_key", string.Empty);
+            Proxy = _configParser.GetValue("settings", "proxy", string.Empty);
+            var debugRaw = _configParser.GetValue("settings", "debug", "false");
             Debug = (debugRaw != null && debugRaw.Equals(true.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
         }
 
@@ -75,13 +67,10 @@ namespace WakaTime
         /// </summary>
         public static void Save()
         {
-            if (!_configData.Sections.ContainsSection("settings"))
-                _configData.Sections.Add(new SectionData("settings"));
-
-            _configData["settings"]["api_key"] = ApiKey.Trim();
-            _configData["settings"]["proxy"] = Proxy.Trim();
-            _configData["settings"]["debug"] = Debug.ToString(CultureInfo.InvariantCulture).ToLowerInvariant();
-            _configParser.WriteFile(_configFilepath, _configData, new UTF8Encoding(false));
+            _configParser.SetValue("settings", "api_key", ApiKey.Trim());
+            _configParser.SetValue("settings", "proxy", Proxy.Trim());
+            _configParser.SetValue("settings", "debug", Debug.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
+            _configParser.Save(_configFilepath);
         }
 
         public static IWebProxy GetProxy()
