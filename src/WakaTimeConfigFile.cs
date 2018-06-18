@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,8 +9,8 @@ namespace WakaTime
 {
     public static class WakaTimeConfigFile
     {
-        private static readonly string _configFilepath;
-        private static readonly ConfigParser _configParser;
+        private static readonly string ConfigFilepath;
+        private static readonly ConfigParser ConfigParser;
 
         #region Constructor
 
@@ -20,8 +19,12 @@ namespace WakaTime
         /// </summary>
         static WakaTimeConfigFile()
         {
-            _configFilepath = GetConfigFilePath();
-            _configParser = new ConfigParser(_configFilepath, new ConfigParserSettings(MultiLineValues.Simple, Encoding.UTF8));
+            ConfigFilepath = GetConfigFilePath();
+            ConfigParser = new ConfigParser(ConfigFilepath, new ConfigParserSettings
+            {
+                MultiLineValues = MultiLineValues.Simple,
+                Encoding = Encoding.UTF8
+            });
             Read();
         }
 
@@ -56,10 +59,9 @@ namespace WakaTime
         /// </summary>
         public static void Read()
         {
-            ApiKey = _configParser.GetValue("settings", "api_key", string.Empty);
-            Proxy = _configParser.GetValue("settings", "proxy", string.Empty);
-            var debugRaw = _configParser.GetValue("settings", "debug", "false");
-            Debug = (debugRaw != null && debugRaw.Equals(true.ToString(CultureInfo.InvariantCulture).ToLowerInvariant()));
+            ApiKey = ConfigParser.GetValue("settings", "api_key", string.Empty);
+            Proxy = ConfigParser.GetValue("settings", "proxy", string.Empty);
+            Debug = ConfigParser.GetValue("settings", "debug", false);
         }
 
         /// <summary>
@@ -67,10 +69,10 @@ namespace WakaTime
         /// </summary>
         public static void Save()
         {
-            _configParser.SetValue("settings", "api_key", ApiKey.Trim());
-            _configParser.SetValue("settings", "proxy", Proxy.Trim());
-            _configParser.SetValue("settings", "debug", Debug.ToString(CultureInfo.InvariantCulture).ToLowerInvariant());
-            _configParser.Save(_configFilepath);
+            ConfigParser.SetValue("settings", "api_key", ApiKey.Trim());
+            ConfigParser.SetValue("settings", "proxy", Proxy.Trim());
+            ConfigParser.SetValue("settings", "debug", Debug);
+            ConfigParser.Save(ConfigFilepath);
         }
 
         public static IWebProxy GetProxy()
