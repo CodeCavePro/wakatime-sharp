@@ -212,7 +212,7 @@ namespace WakaTime
 
         private static void AppendHeartbeat(string fileName, bool isWrite, DateTime time, string project = null)
         {
-#if NET40
+#if NET35 || NET40
             Task.Factory.StartNew(() =>
 #else
             Task.Run(() =>
@@ -238,7 +238,7 @@ namespace WakaTime
 
         private static void ProcessHeartbeats(object sender, ElapsedEventArgs e)
         {
-#if NET40
+#if NET35 || NET40
             Task.Factory.StartNew(() =>
 #else
             Task.Run(() =>
