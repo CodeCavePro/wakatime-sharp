@@ -3,7 +3,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
-using Salaros.Config;
+using Salaros.Configuration;
 
 namespace WakaTime
 {
