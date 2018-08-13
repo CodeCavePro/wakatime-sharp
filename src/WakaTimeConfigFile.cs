@@ -20,6 +20,7 @@ namespace WakaTime
         static WakaTimeConfigFile()
         {
             ConfigFilepath = GetConfigFilePath();
+            using(File.Create(ConfigFilepath)) {} // Create an empty config file
             ConfigParser = new ConfigParser(ConfigFilepath, new ConfigParserSettings
             {
                 MultiLineValues = MultiLineValues.Simple | MultiLineValues.QuoteDelimitedValues,
