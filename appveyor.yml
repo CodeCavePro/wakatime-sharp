@@ -23,7 +23,7 @@ environment:
   VERSION_UNSTABLE_SUFFIX: 'preview'
   APPVEYOR_TOKEN:
     secure: LtoVAPATN9iTCl1zkCvEktqP92QSEEngyS3vqG3GphE=
-    
+
 init:
 - ps: |
     $env:VERSION_SIMPLE = $env:APPVEYOR_BUILD_VERSION.TrimStart("v")
@@ -98,7 +98,7 @@ deploy:
   -
     provider: NuGet
     api_key:
-      secure: TrtChQUTQ9rD8pffK1A9bjMYyN/8eQUjV+7IKVjS/C37TgXMae46Bzd527bZUVSb
+      secure: i6oWn60J7ZOM4UuYcvxbuk9OAEp6or+Wq7izyJDPNlcLIhG2UKsxz7G/8erhdY3M
     artifact: NuGet_Files
     server:             # remove to push to NuGet.org
     skip_symbols: false
@@ -113,7 +113,7 @@ deploy:
     api_key:
       secure: 3zmnmVBweTgdk4SBM/rWHdC9JOM9s0pxm1bw1d+WHDo=
     artifact: NuGet_Files
-    
+
 after_deploy:
     - ps: |
         if ($env:APPVEYOR_REPO_TAG -eq "true" -and $env:APPVEYOR_REPO_TAG_NAME) {
@@ -123,7 +123,7 @@ after_deploy:
                 "Content-type" = "application/json"
             }
             Invoke-RestMethod -Method Put "$apiUrl/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/settings/build-number" -Body '{"nextBuildNumber": 1 }' -Headers $headers
-            
+
             $env:APPVEYOR_REPO_TAG_NAME = $env:APPVEYOR_REPO_TAG_NAME.TrimStart("v")
             if ($env:APPVEYOR_REPO_TAG_NAME -match '^([0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?)$') {
                 $tag_ver = [version]$env:APPVEYOR_REPO_TAG_NAME
