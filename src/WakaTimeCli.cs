@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-using Timer = System.Timers.Timer;
 
 #if NET35 || NET40
 using Ionic.Zip;

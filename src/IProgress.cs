@@ -1,12 +1,12 @@
 ﻿// ==++==
-// 
+//
 //   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
+//
 // ==--==
 /*============================================================
 **
 ** Class:  IProgress<T>
-** 
+**
 ** <OWNER>stoub</OWNER>
 **
 **

@@ -15,7 +15,7 @@ namespace WakaTime
         #region Constructor
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="WakaTime.WakaTimeConfigFile"/> class.
+        /// Initializes a new instance of the <see cref="WakaTimeConfigFile"/> class.
         /// </summary>
         static WakaTimeConfigFile()
         {
