@@ -16,9 +16,9 @@
     <PackOnBuild>true</PackOnBuild>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
-    <Version>0.1.0</Version>
-    <FileVersion>0.1.0</FileVersion>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <Version>10.0.0</Version>
+    <FileVersion>10.0.0</FileVersion>
+    <AssemblyVersion>10.0.0</AssemblyVersion>
     <Authors>Zhmayev Yaroslav aka Salaros</Authors>
     <Company>CodeCave LLC</Company>
     <Owners>salaros,CodeCave</Owners>

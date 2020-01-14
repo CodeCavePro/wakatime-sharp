@@ -4,7 +4,6 @@
         <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
         <OutputPath>..\bin\$(Configuration)\</OutputPath>
         <AssemblyName>WakaTime</AssemblyName>
-        <AssemblyVersion>8.0.0</AssemblyVersion>
         <RootNamespace>WakaTime</RootNamespace>
     </PropertyGroup>
 
@@ -15,8 +14,9 @@
         <Title>WakaTime</Title>
         <Description>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc</Description>
         <Summary>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc. This plug-ins will help to collect metrics, insights and time tracking automatically generated directly from your programming activity.</Summary>
-        <Version>8.0.0</Version>
-        <FileVersion>8.0.0</FileVersion>
+        <Version>10.0.0</Version>
+        <FileVersion>10.0.0</FileVersion>
+        <AssemblyVersion>10.0.0</AssemblyVersion>
         <Authors>Zhmayev Yaroslav aka Salaros</Authors>
         <Company>CodeCave LLC</Company>
         <Owners>salaros,CodeCave</Owners>
