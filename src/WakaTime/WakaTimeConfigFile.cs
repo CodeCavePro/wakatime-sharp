@@ -22,7 +22,7 @@ namespace WakaTime
             ConfigFilepath = GetConfigFilePath();
             ConfigParser = new ConfigParser(ConfigFilepath, new ConfigParserSettings
             {
-                MultiLineValues = MultiLineValues.Simple | MultiLineValues.QuoteDelimitedValues,
+                MultiLineValues = MultiLineValues.Simple,
                 Encoding = new UTF8Encoding(false, false),
                 NewLine = "\n"
             });

@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace WakaTime
 {
     [DataContract]
-    public class Heartbeat
+    public class Heartbeat : ICloneable
     {
 
 #if !NET45
@@ -56,18 +56,19 @@ namespace WakaTime
                 IsWrite = IsWrite,
             };
         }
+        object ICloneable.Clone()
+        {
+            return Clone();
+        }
 
         private static string ToUnixEpoch(DateTime date)
         {
-            DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-            TimeSpan timestamp = date - epoch;
-            long seconds = Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
-            string milliseconds =
+            var epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            var timestamp = date - epoch;
+            var seconds = Convert.ToInt64(Math.Floor(timestamp.TotalSeconds));
+            var milliseconds =
 #if !NET45
-                string.Format("{0:00}:{1:00}:{2:00}",
-                   (int)timestamp.TotalHours,
-                        timestamp.Minutes,
-                        timestamp.Seconds);
+                $"{(int)timestamp.TotalHours:00}:{timestamp.Minutes:00}:{timestamp.Seconds:00}";
 #else
                 timestamp.ToString("ffffff");
 #endif

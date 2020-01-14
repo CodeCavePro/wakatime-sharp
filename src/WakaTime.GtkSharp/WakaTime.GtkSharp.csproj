@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GtkSharp" Version="3.22.25.56" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WakaTime\WakaTime.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <PackOnBuild>true</PackOnBuild>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <Version>0.1.0</Version>
+    <FileVersion>0.1.0</FileVersion>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <Authors>Zhmayev Yaroslav aka Salaros</Authors>
+    <Company>CodeCave LLC</Company>
+    <Owners>salaros,CodeCave</Owners>
+    <Product>WakaTime</Product>
+    <NeutralLanguage>English</NeutralLanguage>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageProjectUrl>https://wakatime.com</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/CodeCavePro/wakatime-sharp.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>A core implementation of all WakaTime C#-driven plug-ins for IDE such as Visual Studio, Xamarin Studio, Monodevelop etc</Description>
+    <Copyright>Copyright 2016 (c) CodeCave LLC</Copyright>
+  </PropertyGroup>
+
+</Project>

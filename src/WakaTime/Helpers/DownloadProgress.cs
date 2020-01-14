@@ -16,7 +16,7 @@ namespace WakaTime
 
         public static void Show(string message = "")
         {
-            _progressReporter = _initReporter();
+            _progressReporter = _initReporter?.Invoke();
             _progressReporter.Show(message);
         }
 

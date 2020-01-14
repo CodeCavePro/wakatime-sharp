@@ -15,9 +15,9 @@ using Newtonsoft.Json;
 
 namespace WakaTime
 {
-    public abstract class WakaTimeIdePlugin<T> : IWakaTimeIdePlugin, IDisposable
+    public abstract class WakaTimeIdePlugin<TIde> : IDisposable
     {
-#region Fields
+        #region Fields
 
         protected string lastFile;
         protected string lastSolutionName;
@@ -26,17 +26,17 @@ namespace WakaTime
         protected readonly object threadLock = new object();
 
         protected static EditorInfo editorInfo;
-        protected T editorObj;
+        protected TIde editorObj;
 
         const int heartbeatFrequency = 2; // minutes
         protected static ConcurrentQueue<Heartbeat> heartbeatQueue;
         protected static Timer timer;
 
-#endregion
+        #endregion
 
-#region Startup/Cleanup
+        #region Startup/Cleanup
 
-        protected WakaTimeIdePlugin(T editor)
+        protected WakaTimeIdePlugin(TIde editor)
         {
             editorObj = editor;
             lastHeartbeat = DateTime.UtcNow.AddMinutes(-3);
@@ -59,7 +59,7 @@ namespace WakaTime
             }
             catch
             {
-                Logger.Initialize(GetConsoleLogger()); // fallback on console logger
+                Logger.Initialize(GetConsoleLogger()); // fall-back on console logger
             }
 
             try
@@ -128,9 +128,9 @@ namespace WakaTime
 
         public abstract string GetActiveSolutionPath();
 
-#endregion
+        #endregion
 
-#region Event Handlers
+        #region Event Handlers
 
         public void OnDocumentOpened(string documentName)
         {
@@ -185,9 +185,9 @@ namespace WakaTime
             }
         }
 
-#endregion
+        #endregion
 
-#region Methods
+        #region Methods
 
         protected void HandleActivity(string currentFile, bool isWrite)
         {
@@ -269,20 +269,18 @@ namespace WakaTime
             }
 
             // get first heartbeat from queue
-            Heartbeat heartbeat;
-            bool gotOne = heartbeatQueue.TryDequeue(out heartbeat);
+            var gotOne = heartbeatQueue.TryDequeue(out Heartbeat heartbeat);
             if (!gotOne)
                 return;
 
             // remove all extra heartbeats from queue
             var extraHeartbeats = new List<Heartbeat>();
-            Heartbeat hbOut;
-            while (heartbeatQueue.TryDequeue(out hbOut))
+            while (heartbeatQueue.TryDequeue(out Heartbeat hbOut))
             {
                 extraHeartbeats.Add(hbOut.Clone());
             }
 
-            bool hasExtraHeartbeats = extraHeartbeats.Any();
+            var hasExtraHeartbeats = extraHeartbeats.Any();
             var cliParams = new PythonCliParameters
             {
                 Key = WakaTimeConfigFile.ApiKey,
@@ -360,7 +358,7 @@ namespace WakaTime
 
         public abstract IDownloadProgressReporter GetReporter();
 
-#endregion
+        #endregion
     }
 }
 

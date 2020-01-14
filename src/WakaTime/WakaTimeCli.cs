@@ -167,7 +167,7 @@ namespace WakaTime
                         zipFile.ExtractAll(ConfigDir, ExtractExistingFileAction.OverwriteSilently);
                     }
 #else
-					ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
+                    ZipFile.ExtractToDirectory(localZipFile, ConfigDir);
 #endif
 
                     Logger.Debug(string.Format("Finished extracting wakatime cli: {0}", GetCliPath()));

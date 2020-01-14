@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27729.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29001.49
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WakaTime", "src\WakaTime.csproj", "{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WakaTime", "src\WakaTime\WakaTime.csproj", "{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{797C7B9D-CCA9-492B-9A97-AE35C068636B}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WakaTime.GtkSharp", "src\WakaTime.GtkSharp\WakaTime.GtkSharp.csproj", "{73C80406-5D7C-4E2A-8332-755FA6CA5107}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WakaTime.WinForms", "src\WakaTime.WinForms\WakaTime.WinForms.csproj", "{5DE27A1B-F660-451D-AC81-C904C0ABB979}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,6 +30,14 @@ Global
 		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42ADD38C-D6B0-4304-9459-F0D003DD4FE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73C80406-5D7C-4E2A-8332-755FA6CA5107}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73C80406-5D7C-4E2A-8332-755FA6CA5107}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73C80406-5D7C-4E2A-8332-755FA6CA5107}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73C80406-5D7C-4E2A-8332-755FA6CA5107}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DE27A1B-F660-451D-AC81-C904C0ABB979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DE27A1B-F660-451D-AC81-C904C0ABB979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DE27A1B-F660-451D-AC81-C904C0ABB979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DE27A1B-F660-451D-AC81-C904C0ABB979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

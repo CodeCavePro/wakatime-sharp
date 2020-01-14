@@ -33,7 +33,7 @@ namespace WakaTime
 
         public static void Error(string message, Exception ex = null)
         {
-            Log(LogLevel.HandledException, string.Format("{0}: {1}", message, ex));
+            Log(LogLevel.HandledException, $"{message}: {ex}");
         }
 
         public static void Warning(string message)
@@ -48,11 +48,7 @@ namespace WakaTime
 
         private static void Log(LogLevel level, string message)
         {
-            message = string.Format("[Wakatime {0} {1}] {2}{3}",
-                    Enum.GetName(level.GetType(), level),
-                    DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture),
-                    message,
-                    Environment.NewLine);
+            message = $"[Wakatime {Enum.GetName(level.GetType(), level)} {DateTime.Now.ToString("hh:mm:ss tt", CultureInfo.InvariantCulture)}] {message}{Environment.NewLine}";
 
             _logger.Log(message);
         }
