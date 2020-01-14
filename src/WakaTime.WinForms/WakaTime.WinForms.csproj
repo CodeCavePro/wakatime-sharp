@@ -3,8 +3,6 @@
   <PropertyGroup>
     <OutputType>library</OutputType>
     <TargetFrameworks>netcoreapp3.0;net40</TargetFrameworks>
-    <UseWindowsForms>true</UseWindowsForms>
-    <GenerateResourceUsePreserializedResources>false</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,7 +14,12 @@
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.0" Condition="'$(TargetFramework)' != 'net40'" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
+  <PropertyGroup Condition="'$(TargetFramework)' != 'net40'">
+    <UseWindowsForms>true</UseWindowsForms>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net40'">
     <PackageReference Include="System.Resources.Extensions">
       <Version>4.7.0</Version>
     </PackageReference>
