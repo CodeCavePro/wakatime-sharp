@@ -3,8 +3,6 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net40;net45</TargetFrameworks>
         <OutputPath>..\bin\$(Configuration)\</OutputPath>
-        <AssemblyName>WakaTime</AssemblyName>
-        <RootNamespace>WakaTime</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup>
