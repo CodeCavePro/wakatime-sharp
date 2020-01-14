@@ -1,3 +1,5 @@
+os: Windows Server 2019
+
 image: Visual Studio 2019
 
 # Restrict to Git branches below
@@ -10,6 +12,8 @@ configuration: Debug
 
 # Scripts that run after cloning repository
 install:
+  - cmd: where dotnet
+  - cmd: dotnet nuget locals all -c
   - cmd: dotnet restore
 
 environment:
@@ -63,8 +67,6 @@ assembly_info:
 
 # Run scripts below before
 before_build:
-  - cmd: where dotnet
-  - cmd: dotnet --info
   - cmd: dotnet clean
 
 # Run scripts below before
