@@ -21,7 +21,7 @@ namespace WakaTime
         {
             ConfigDir = GetAppDataDirectory();
             CliFolder = string.Join(Path.DirectorySeparatorChar.ToString(), new[]{
-                "wakatime-master",
+                "legacy-python-cli-master",
                 "wakatime",
                 "cli.py"
             });
@@ -33,7 +33,7 @@ namespace WakaTime
             {
                 try
                 {
-                    var cliFolder = Path.Combine(ConfigDir, "wakatime-master");
+                    var cliFolder = Path.Combine(ConfigDir, "legacy-python-cli-master");
                     if (Directory.Exists(cliFolder))
                         Directory.Delete(cliFolder, true);
                 }
