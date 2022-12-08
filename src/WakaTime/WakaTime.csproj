@@ -41,7 +41,7 @@
 
     <ItemGroup>
         <PackageReference Include="Salaros.ConfigParser" Version="0.3.4" />
-        <PackageReference Include="Newtonsoft.Json" Version="12.0.3" Condition="'$(TargetFramework)' != 'net45'" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.2" Condition="'$(TargetFramework)' != 'net45'" />
         <PackageReference Include="DotNetZip" Version="1.13.5" Condition="'$(TargetFramework)' == 'net40'" />
         <Reference Include="System.Web.Extensions" Condition="'$(TargetFramework)' == 'net45'" />
     </ItemGroup>
