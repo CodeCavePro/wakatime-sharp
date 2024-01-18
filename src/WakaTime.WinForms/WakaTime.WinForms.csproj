@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <Reference Include="System.Windows.Forms" Condition="'$(TargetFramework)' == 'net40'" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.0" Condition="'$(TargetFramework)' != 'net40'" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="3.1.5" Condition="'$(TargetFramework)' != 'net40'" />
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' != 'net40'">
